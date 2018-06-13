@@ -1,0 +1,5 @@
+libnymea-networkmanager (0.1.0) xenial; urgency=medium
+
+  * Initial release.
+
+ -- Simon Stürz <simon.stuerz@guh.io>  Mon, 13 Jun 2018 17:48:40 +0100
