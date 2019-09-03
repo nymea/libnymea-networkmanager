@@ -43,5 +43,3 @@ target_wrapper.*
 CMakeLists.txt.user*
 
 .crossbuilder
-*.deb
-debs.*
