@@ -1,11 +1,11 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Author: Simon Stürz <simon.stuerz@guh.io>
-Download: https://github.com/guh/nymea-networkmanager
+Author: Simon Stürz <simon.stuerz@nymea.io>
+Download: https://github.com/guh/libnymea-networkmanager
 
 License: GPL-3+
  On Debian systems, the complete text of the GNU General
  Public License can be found in `/usr/share/common-licenses/GPL-3'.
 
 Files: *
-Copyright: (C) 2018 Simon Stürz <simon.stuerz@guh.io>
+Copyright: (C) 2018 - 2019 Simon Stürz <simon.stuerz@nymea.io>
 License: GPL-3+
