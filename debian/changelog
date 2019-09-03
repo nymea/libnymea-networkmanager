@@ -1,3 +1,9 @@
+libnymea-networkmanager (0.1.1) UNRELEASED; urgency=medium
+
+  * Add access point functionality
+
+ -- Simon Stürz <simon.stuerz@nymea.io>  Tue, 03 Sep 2019 15:59:22 +0200
+
 libnymea-networkmanager (0.1.0) xenial; urgency=medium
 
   * Initial release.
