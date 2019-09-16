@@ -1,8 +1,10 @@
-libnymea-networkmanager (0.1.1) UNRELEASED; urgency=medium
+libnymea-networkmanager (0.1.1) xenial; urgency=medium
 
+  [ Simon Stürz ]
   * Add access point functionality
+  * Update pkgconfig and include dir path
 
- -- Simon Stürz <simon.stuerz@nymea.io>  Tue, 03 Sep 2019 15:59:22 +0200
+ -- Jenkins <jenkins@nymea.io>  Mon, 16 Sep 2019 22:42:16 +0200
 
 libnymea-networkmanager (0.1.0) xenial; urgency=medium
 
