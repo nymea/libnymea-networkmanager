@@ -1,29 +1,37 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                               *
- * Copyright (C) 2016 Simon Stürz <simon.stuerz@guh.io>                          *
- *                                                                               *
- * This file is part of loopd.                                                   *
- *                                                                               *
- * Loopd can not be copied and/or distributed without the express                *
- * permission of guh GmbH.                                                       *
- *                                                                               *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                                         *
+ * Copyright (C) 2019 Simon Stürz <simon.stuerz@nymea.io>                  *
+ *                                                                         *
+ * This file is part of libnymea-networkmanager.                           *
+ *                                                                         *
+ *  This library is free software; you can redistribute it and/or          *
+ *  modify it under the terms of the GNU Lesser General Public             *
+ *  License as published by the Free Software Foundation; either           *
+ *  version 2.1 of the License, or (at your option) any later version.     *
+ *                                                                         *
+ *  This library is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
+ *  Lesser General Public License for more details.                        *
+ *                                                                         *
+ *  You should have received a copy of the GNU Lesser General Public       *
+ *  License along with this library; If not, see                           *
+ *  <http://www.gnu.org/licenses/>.                                        *
+ *                                                                         *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "wirelessservice.h"
 #include "bluetoothuuids.h"
-#include "loggingcategory.h"
-#include "loopd.h"
 
 #include <QJsonDocument>
 #include <QNetworkInterface>
 #include <QLowEnergyDescriptorData>
 #include <QLowEnergyCharacteristicData>
 
-WirelessService::WirelessService(QLowEnergyService *service, QObject *parent) :
+WirelessService::WirelessService(QLowEnergyService *service, NetworkManager *networkManager, QObject *parent) :
     QObject(parent),
     m_service(service),
-    m_device(nullptr),
-    m_readingInputData(false)
+    m_networkManager(networkManager)
 {    
     qCDebug(dcNetworkManagerBluetoothServer()) << "Create WirelessService.";
 
@@ -35,13 +43,13 @@ WirelessService::WirelessService(QLowEnergyService *service, QObject *parent) :
     connect(m_service, SIGNAL(error(QLowEnergyService::ServiceError)), this, SLOT(serviceError(QLowEnergyService::ServiceError)));
 
     // Get the wireless network device if there is any
-    if (!Loopd::instance()->networkManager()->wirelessAvailable()) {
+    if (!m_networkManager->wirelessAvailable()) {
         qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: There is no wireless network device available";
         return;
     }
 
-    qCDebug(dcNetworkManagerBluetoothServer()) << "WirelessService: Using" << Loopd::instance()->networkManager()->wirelessNetworkDevices().first();
-    m_device = Loopd::instance()->networkManager()->wirelessNetworkDevices().first();
+    qCDebug(dcNetworkManagerBluetoothServer()) << "WirelessService: Using" << m_networkManager->wirelessNetworkDevices().first();
+    m_device = m_networkManager->wirelessNetworkDevices().first();
     connect(m_device, &WirelessNetworkDevice::bitRateChanged, this, &WirelessService::onWirelessDeviceBitRateChanged);
     connect(m_device, &WirelessNetworkDevice::stateChanged, this, &WirelessService::onWirelessDeviceStateChanged);
 }
@@ -80,11 +88,7 @@ QLowEnergyServiceData WirelessService::serviceData()
     wirelessStatusCharacteristicData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
     wirelessStatusCharacteristicData.addDescriptor(clientConfigDescriptorData);
     wirelessStatusCharacteristicData.setValueLength(1, 1);
-    if (!Loopd::instance()->networkManager()->wirelessAvailable()) {
-        wirelessStatusCharacteristicData.setValue(WirelessService::getWirelessNetworkDeviceState(NetworkDevice::NetworkDeviceStateUnavailable));
-    } else {
-        wirelessStatusCharacteristicData.setValue(WirelessService::getWirelessNetworkDeviceState(Loopd::instance()->networkManager()->wirelessNetworkDevices().first()->deviceState()));
-    }
+    wirelessStatusCharacteristicData.setValue(WirelessService::getWirelessNetworkDeviceState(NetworkDevice::NetworkDeviceStateUnavailable));
     serviceData.addCharacteristic(wirelessStatusCharacteristicData);
 
     return serviceData;
@@ -94,7 +98,7 @@ QLowEnergyServiceData WirelessService::serviceData()
 WirelessService::WirelessServiceResponse WirelessService::checkWirelessErrors()
 {
     // Check possible errors
-    if (!Loopd::instance()->networkManager()->available()) {
+    if (!m_networkManager->available()) {
         qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: The networkmanager is not available.";
         return WirelessServiceResponseNetworkManagerNotAvailable;
     }
@@ -104,12 +108,12 @@ WirelessService::WirelessServiceResponse WirelessService::checkWirelessErrors()
         return WirelessServiceResponseWirelessNotAvailable;
     }
 
-    if (!Loopd::instance()->networkManager()->networkingEnabled()) {
+    if (!m_networkManager->networkingEnabled()) {
         qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Networking not enabled";
         return WirelessServiceResponseNetworkingNotEnabled;
     }
 
-    if (!Loopd::instance()->networkManager()->wirelessEnabled()) {
+    if (!m_networkManager->wirelessEnabled()) {
         qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Wireless not enabled";
         return WirelessServiceResponseWirelessNotEnabled;
     }
@@ -241,7 +245,7 @@ void WirelessService::commandConnect(const QVariantMap &request)
         return;
     }
 
-    NetworkManager::NetworkManagerError networkError = Loopd::instance()->networkManager()->connectWifi(m_device->interface(), parameters.value("e").toString(), parameters.value("p").toString());
+    NetworkManager::NetworkManagerError networkError = m_networkManager->connectWifi(m_device->interface(), parameters.value("e").toString(), parameters.value("p").toString());
     WirelessService::WirelessServiceResponse responseCode = WirelessService::WirelessServiceResponseSuccess;
     switch (networkError) {
     case NetworkManager::NetworkManagerErrorNoError:

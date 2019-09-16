@@ -1,13 +1,24 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                               *
- * Copyright (C) 2016 Simon Stürz <simon.stuerz@guh.io>                          *
- *                                                                               *
- * This file is part of loopd.                                                   *
- *                                                                               *
- * Loopd can not be copied and/or distributed without the express                *
- * permission of guh GmbH.                                                       *
- *                                                                               *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                                         *
+ * Copyright (C) 2019 Simon Stürz <simon.stuerz@nymea.io>                  *
+ *                                                                         *
+ * This file is part of libnymea-networkmanager.                           *
+ *                                                                         *
+ *  This library is free software; you can redistribute it and/or          *
+ *  modify it under the terms of the GNU Lesser General Public             *
+ *  License as published by the Free Software Foundation; either           *
+ *  version 2.1 of the License, or (at your option) any later version.     *
+ *                                                                         *
+ *  This library is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
+ *  Lesser General Public License for more details.                        *
+ *                                                                         *
+ *  You should have received a copy of the GNU Lesser General Public       *
+ *  License along with this library; If not, see                           *
+ *  <http://www.gnu.org/licenses/>.                                        *
+ *                                                                         *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef BLUETOOTHUUIDS_H
 #define BLUETOOTHUUIDS_H
@@ -25,11 +36,5 @@ static QBluetoothUuid wirelessServiceUuid =                 QBluetoothUuid(QUuid
 static QBluetoothUuid wirelessCommanderCharacteristicUuid = QBluetoothUuid(QUuid("e081fec1-f757-4449-b9c9-bfa83133f7fc"));
 static QBluetoothUuid wirelessResponseCharacteristicUuid =  QBluetoothUuid(QUuid("e081fec2-f757-4449-b9c9-bfa83133f7fc"));
 static QBluetoothUuid wirelessStateCharacteristicUuid =     QBluetoothUuid(QUuid("e081fec3-f757-4449-b9c9-bfa83133f7fc"));
-
-static QBluetoothUuid systemServiceUuid =                 QBluetoothUuid(QUuid("e081fed0-f757-4449-b9c9-bfa83133f7fc"));
-static QBluetoothUuid systemCommanderCharacteristicUuid = QBluetoothUuid(QUuid("e081fed1-f757-4449-b9c9-bfa83133f7fc"));
-static QBluetoothUuid systemResponseCharacteristicUuid =  QBluetoothUuid(QUuid("e081fed2-f757-4449-b9c9-bfa83133f7fc"));
-static QBluetoothUuid systemUpdateCharacteristicUuid =    QBluetoothUuid(QUuid("e081fed3-f757-4449-b9c9-bfa83133f7fc"));
-
 
 #endif // BLUETOOTHUUIDS_H

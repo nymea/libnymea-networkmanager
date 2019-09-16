@@ -1,3 +1,25 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                                         *
+ * Copyright (C) 2019 Simon Stürz <simon.stuerz@nymea.io>                  *
+ *                                                                         *
+ * This file is part of libnymea-networkmanager.                           *
+ *                                                                         *
+ *  This library is free software; you can redistribute it and/or          *
+ *  modify it under the terms of the GNU Lesser General Public             *
+ *  License as published by the Free Software Foundation; either           *
+ *  version 2.1 of the License, or (at your option) any later version.     *
+ *                                                                         *
+ *  This library is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
+ *  Lesser General Public License for more details.                        *
+ *                                                                         *
+ *  You should have received a copy of the GNU Lesser General Public       *
+ *  License along with this library; If not, see                           *
+ *  <http://www.gnu.org/licenses/>.                                        *
+ *                                                                         *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #include "networkservice.h"
 #include "bluetoothuuids.h"
 
@@ -19,9 +41,9 @@ NetworkService::NetworkService(QLowEnergyService *service, NetworkManager *netwo
     connect(m_service, SIGNAL(error(QLowEnergyService::ServiceError)), this, SLOT(serviceError(QLowEnergyService::ServiceError)));
 
     // NetworkManager
-    connect(Loopd::instance()->networkManager(), &NetworkManager::stateChanged, this, &NetworkService::onNetworkManagerStateChanged);
-    connect(Loopd::instance()->networkManager(), &NetworkManager::networkingEnabledChanged, this, &NetworkService::onNetworkingEnabledChanged);
-    connect(Loopd::instance()->networkManager(), &NetworkManager::wirelessEnabledChanged, this, &NetworkService::onWirelessEnabledChanged);
+    connect(m_networkManager, &NetworkManager::stateChanged, this, &NetworkService::onNetworkManagerStateChanged);
+    connect(m_networkManager, &NetworkManager::networkingEnabledChanged, this, &NetworkService::onNetworkingEnabledChanged);
+    connect(m_networkManager, &NetworkManager::wirelessEnabledChanged, this, &NetworkService::onWirelessEnabledChanged);
 }
 
 QLowEnergyService *NetworkService::service()
@@ -43,7 +65,7 @@ QLowEnergyServiceData NetworkService::serviceData()
     networkStatusData.setValue(QByteArray(1, 0));
     networkStatusData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
     networkStatusData.addDescriptor(clientConfigDescriptorData);
-    networkStatusData.setValue(NetworkService::getNetworkManagerStateByteArray(Loopd::instance()->networkManager()->state()));
+    networkStatusData.setValue(NetworkService::getNetworkManagerStateByteArray(NetworkManager::NetworkManagerStateUnknown));
     serviceData.addCharacteristic(networkStatusData);
 
     // Network manager commander ef6d6612-b8af-49e0-9eca-ab343513641c
@@ -66,7 +88,7 @@ QLowEnergyServiceData NetworkService::serviceData()
     networkingEnabledStatusData.setUuid(networkingEnabledCharacteristicUuid);
     networkingEnabledStatusData.setValue(QByteArray(1, 0));
     networkingEnabledStatusData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
-    networkingEnabledStatusData.setValue(QByteArray::number(static_cast<int>(Loopd::instance()->networkManager()->networkingEnabled())));
+    networkingEnabledStatusData.setValue(QByteArray::number(0));
     serviceData.addCharacteristic(networkingEnabledStatusData);
 
     // Wireless enabled ef6d6615-b8af-49e0-9eca-ab343513641c
@@ -74,7 +96,7 @@ QLowEnergyServiceData NetworkService::serviceData()
     wirelessEnabledStatusData.setUuid(wirelessEnabledCharacteristicUuid);
     wirelessEnabledStatusData.setValue(QByteArray(1, 0));
     wirelessEnabledStatusData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
-    wirelessEnabledStatusData.setValue(QByteArray::number(static_cast<int>(Loopd::instance()->networkManager()->wirelessEnabled())));
+    wirelessEnabledStatusData.setValue(QByteArray::number(0));
     serviceData.addCharacteristic(wirelessEnabledStatusData);
 
     return serviceData;
@@ -179,7 +201,7 @@ void NetworkService::characteristicChanged(const QLowEnergyCharacteristic &chara
             return;
         }
 
-        if (!Loopd::instance()->networkManager()->available()) {
+        if (!m_networkManager->available()) {
             qCWarning(dcNetworkManagerBluetoothServer()) << "NetworkService: Networkmanager not available";
             sendResponse(NetworkServiceResponseNetworkManagerNotAvailable);
             return;
@@ -249,19 +271,19 @@ void NetworkService::processCommand(const NetworkServiceCommand &command)
     switch (command) {
     case NetworkServiceCommandEnableNetworking:
         qCDebug(dcNetworkManagerBluetoothServer()) << "NetworkService: received \"Enable networking\" command";
-        Loopd::instance()->networkManager()->enableNetworking(true);
+        m_networkManager->enableNetworking(true);
         break;
     case NetworkServiceCommandDisableNetworking:
         qCDebug(dcNetworkManagerBluetoothServer()) << "NetworkService: received \"Disable networking\" command";
-        Loopd::instance()->networkManager()->enableNetworking(false);
+        m_networkManager->enableNetworking(false);
         break;
     case NetworkServiceCommandEnableWireless:
         qCDebug(dcNetworkManagerBluetoothServer()) << "NetworkService: received \"Enable wireless networking\" command";
-        Loopd::instance()->networkManager()->enableWireless(true);
+        m_networkManager->enableWireless(true);
         break;
     case NetworkServiceCommandDisableWireless:
         qCDebug(dcNetworkManagerBluetoothServer()) << "NetworkService: received \"Disable wireless networking\" command";
-        Loopd::instance()->networkManager()->enableWireless(false);
+        m_networkManager->enableWireless(false);
         break;
     default:
         qCWarning(dcNetworkManagerBluetoothServer()) << "NetworkService: Unhandled command" << command;
@@ -283,8 +305,8 @@ bool NetworkService::onNetworkManagerStateChanged()
         return false;
     }
 
-    qCDebug(dcNetworkManagerBluetoothServer()) << "NetworkService: Notify state changed" << NetworkService::getNetworkManagerStateByteArray(Loopd::instance()->networkManager()->state());
-    m_service->writeCharacteristic(characteristic, NetworkService::getNetworkManagerStateByteArray(Loopd::instance()->networkManager()->state()));
+    qCDebug(dcNetworkManagerBluetoothServer()) << "NetworkService: Notify state changed" << NetworkService::getNetworkManagerStateByteArray(m_networkManager->state());
+    m_service->writeCharacteristic(characteristic, NetworkService::getNetworkManagerStateByteArray(m_networkManager->state()));
     return true;
 }
 
@@ -301,8 +323,8 @@ bool NetworkService::onNetworkingEnabledChanged()
         return false;
     }
 
-    qCDebug(dcNetworkManagerBluetoothServer()) << "NetworkService: Notify networking enabled changed:" << (Loopd::instance()->networkManager()->networkingEnabled() ? "enabled" : "disabled");
-    m_service->writeCharacteristic(characteristic, Loopd::instance()->networkManager()->networkingEnabled() ? QByteArray::fromHex("01") : QByteArray::fromHex("00"));
+    qCDebug(dcNetworkManagerBluetoothServer()) << "NetworkService: Notify networking enabled changed:" << (m_networkManager->networkingEnabled() ? "enabled" : "disabled");
+    m_service->writeCharacteristic(characteristic, m_networkManager->networkingEnabled() ? QByteArray::fromHex("01") : QByteArray::fromHex("00"));
     return true;
 }
 
@@ -319,7 +341,7 @@ bool NetworkService::onWirelessEnabledChanged()
         return false;
     }
 
-    qCDebug(dcNetworkManagerBluetoothServer()) << "NetworkService: Notify wireless networking enabled changed:" << (Loopd::instance()->networkManager()->wirelessEnabled() ? "enabled" : "disabled");
-    m_service->writeCharacteristic(characteristic, Loopd::instance()->networkManager()->wirelessEnabled() ? QByteArray::fromHex("01") : QByteArray::fromHex("00"));
+    qCDebug(dcNetworkManagerBluetoothServer()) << "NetworkService: Notify wireless networking enabled changed:" << (m_networkManager->wirelessEnabled() ? "enabled" : "disabled");
+    m_service->writeCharacteristic(characteristic, m_networkManager->wirelessEnabled() ? QByteArray::fromHex("01") : QByteArray::fromHex("00"));
     return true;
 }

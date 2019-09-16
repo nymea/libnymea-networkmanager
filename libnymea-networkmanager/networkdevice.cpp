@@ -1,25 +1,26 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                               *
- * Copyright (C) 2018 Simon Stürz <simon.stuerz@guh.io>                          *
- *                                                                               *
- * This file is part of libnymea-networkmanager.                                 *
- *                                                                               *
- * libnymea-networkmanager is free software: you can redistribute it and/or      *
- * modify it under the terms of the GNU General Public License as published by   *
- * the Free Software Foundation, either version 3 of the License,                *
- * or (at your option) any later version.                                        *
- *                                                                               *
- * libnymea-networkmanager is distributed in the hope that it will be useful,    *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of                *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  *
- * GNU General Public License for more details.                                  *
- *                                                                               *
- * You should have received a copy of the GNU General Public License along       *
- * with libnymea-networkmanager. If not, see <http://www.gnu.org/licenses/>.     *
- *                                                                               *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                                         *
+ * Copyright (C) 2018-2019 Simon Stürz <simon.stuerz@nymea.io>             *
+ *                                                                         *
+ * This file is part of libnymea-networkmanager.                           *
+ *                                                                         *
+ *  This library is free software; you can redistribute it and/or          *
+ *  modify it under the terms of the GNU Lesser General Public             *
+ *  License as published by the Free Software Foundation; either           *
+ *  version 2.1 of the License, or (at your option) any later version.     *
+ *                                                                         *
+ *  This library is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
+ *  Lesser General Public License for more details.                        *
+ *                                                                         *
+ *  You should have received a copy of the GNU Lesser General Public       *
+ *  License along with this library; If not, see                           *
+ *  <http://www.gnu.org/licenses/>.                                        *
+ *                                                                         *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*! \enum guhserver::NetworkDevice::NetworkDeviceState
+/*! \enum NetworkDevice::NetworkDeviceState
     \value NetworkDeviceStateUnknown
     \value NetworkDeviceStateUnmanaged
     \value NetworkDeviceStateUnavailable
@@ -35,7 +36,7 @@
     \value NetworkDeviceStateFailed
 */
 
-/*! \enum guhserver::NetworkDevice::NetworkDeviceStateReason
+/*! \enum NetworkDevice::NetworkDeviceStateReason
     \value NetworkDeviceStateReasonNone
     \value NetworkDeviceStateReasonUnknown
     \value NetworkDeviceStateReasonNowManaged
@@ -102,7 +103,7 @@
 */
 
 
-/*! \enum guhserver::NetworkDevice::NetworkDeviceType
+/*! \enum NetworkDevice::NetworkDeviceType
     \value NetworkDeviceTypeUnknown
     \value NetworkDeviceTypeEthernet
     \value NetworkDeviceTypeWifi

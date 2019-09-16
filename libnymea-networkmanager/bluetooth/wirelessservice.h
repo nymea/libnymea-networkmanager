@@ -1,13 +1,24 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                               *
- * Copyright (C) 2016 Simon Stürz <simon.stuerz@guh.io>                          *
- *                                                                               *
- * This file is part of loopd.                                                   *
- *                                                                               *
- * Loopd can not be copied and/or distributed without the express                *
- * permission of guh GmbH.                                                       *
- *                                                                               *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                                         *
+ * Copyright (C) 2019 Simon Stürz <simon.stuerz@nymea.io>                  *
+ *                                                                         *
+ * This file is part of libnymea-networkmanager.                           *
+ *                                                                         *
+ *  This library is free software; you can redistribute it and/or          *
+ *  modify it under the terms of the GNU Lesser General Public             *
+ *  License as published by the Free Software Foundation; either           *
+ *  version 2.1 of the License, or (at your option) any later version.     *
+ *                                                                         *
+ *  This library is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
+ *  Lesser General Public License for more details.                        *
+ *                                                                         *
+ *  You should have received a copy of the GNU Lesser General Public       *
+ *  License along with this library; If not, see                           *
+ *  <http://www.gnu.org/licenses/>.                                        *
+ *                                                                         *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #ifndef WIRELESSSERVICE_H
 #define WIRELESSSERVICE_H
@@ -59,7 +70,7 @@ private:
     NetworkManager *m_networkManager = nullptr;
     WirelessNetworkDevice *m_device = nullptr;
 
-    bool m_readingInputData;
+    bool m_readingInputData = false;
     QByteArray m_inputDataStream;
 
     WirelessServiceResponse checkWirelessErrors();

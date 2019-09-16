@@ -1,3 +1,24 @@
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                                         *
+ * Copyright (C) 2019 Simon Stürz <simon.stuerz@nymea.io>                  *
+ *                                                                         *
+ * This file is part of libnymea-networkmanager.                           *
+ *                                                                         *
+ *  This library is free software; you can redistribute it and/or          *
+ *  modify it under the terms of the GNU Lesser General Public             *
+ *  License as published by the Free Software Foundation; either           *
+ *  version 2.1 of the License, or (at your option) any later version.     *
+ *                                                                         *
+ *  This library is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
+ *  Lesser General Public License for more details.                        *
+ *                                                                         *
+ *  You should have received a copy of the GNU Lesser General Public       *
+ *  License along with this library; If not, see                           *
+ *  <http://www.gnu.org/licenses/>.                                        *
+ *                                                                         *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #include "bluetoothserver.h"
 #include "../networkmanager.h"
 #include "../networkmanagerutils.h"
@@ -358,8 +379,8 @@ void BluetoothServer::start()
     m_genericAttributeService = m_controller->addService(genericAttributeServiceData(), m_controller);
 
     // Create custom services
-    m_networkService = new NetworkService(m_controller->addService(NetworkService::serviceData(), m_controller), m_controller);
-    m_wirelessService = new WirelessService(m_controller->addService(WirelessService::serviceData(), m_controller), m_controller);
+    m_networkService = new NetworkService(m_controller->addService(NetworkService::serviceData(), m_controller), m_networkManager, m_controller);
+    m_wirelessService = new WirelessService(m_controller->addService(WirelessService::serviceData(), m_controller), m_networkManager, m_controller);
 
     QLowEnergyAdvertisingData advertisingData;
     advertisingData.setDiscoverability(QLowEnergyAdvertisingData::DiscoverabilityGeneral);
