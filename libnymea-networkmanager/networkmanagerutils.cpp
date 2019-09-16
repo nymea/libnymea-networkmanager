@@ -22,6 +22,7 @@
 #include "networkmanagerutils.h"
 
 Q_LOGGING_CATEGORY(dcNetworkManager, "NetworkManager")
+Q_LOGGING_CATEGORY(dcNetworkManagerBluetoothServer, "NetworkManagerBluetoothServer")
 
 QString NetworkManagerUtils::NetworkManagerUtils::networkManagerServiceString()
 {

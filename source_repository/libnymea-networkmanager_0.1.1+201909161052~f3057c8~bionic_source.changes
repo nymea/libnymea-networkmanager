@@ -1,0 +1,35 @@
+Format: 1.8
+Date: Mon, 16 Sep 2019 10:54:25 +0000
+Source: libnymea-networkmanager
+Binary: libnymea-networkmanager libnymea-networkmanager-dev libnymea-networkmanager-dbg
+Built-For-Profiles: nocheck nodoc noautodbgsym
+Architecture: source
+Version: 0.1.1+201909161052~f3057c8~bionic
+Distribution: UNRELEASED
+Urgency: medium
+Maintainer: Simon Stürz <simon.stuerz@nymea.io>
+Changed-By: <timon@libnymea-networkmanager-bionic-amd64-amd64.lxd>
+Description:
+ libnymea-networkmanager - Qt 5 based library for the network-manager DBus API.
+ libnymea-networkmanager-dbg - Qt 5 based library for the network-manager DBus API - debug symbo
+ libnymea-networkmanager-dev - Qt 5 based library for the network-manager DBus API - development
+Changes:
+ libnymea-networkmanager (0.1.1+201909161052~f3057c8~bionic) UNRELEASED; urgency=medium
+ .
+   [ Simon Stürz ]
+   * Add access point functionality
+ .
+   [  ]
+   * New Package build
+Checksums-Sha1:
+ d74bad8dc14b32173399a686e602ad18c124dd0e 969 libnymea-networkmanager_0.1.1+201909161052~f3057c8~bionic.dsc
+ 8cab839f42a6ec82a5405acddea70944435ebf37 26500 libnymea-networkmanager_0.1.1+201909161052~f3057c8~bionic.tar.xz
+ f20b18d8c4ad3c0e4660362e762b9bf3dfd92ac4 11096 libnymea-networkmanager_0.1.1+201909161052~f3057c8~bionic_source.buildinfo
+Checksums-Sha256:
+ 14eb24a6fd3ed94cf455302225a2134aeed86f7b8d0510ff4314c4b2ba25bec0 969 libnymea-networkmanager_0.1.1+201909161052~f3057c8~bionic.dsc
+ 5d1e9c7c1fcda6a69f199f38ed88cd7ea00f4e7627221714eb21b9e1246c5ef2 26500 libnymea-networkmanager_0.1.1+201909161052~f3057c8~bionic.tar.xz
+ 281438bbb3b6223a052a80bd6eb0f023c26d9833005ce8377220ac2730d8ca23 11096 libnymea-networkmanager_0.1.1+201909161052~f3057c8~bionic_source.buildinfo
+Files:
+ a15c2aa2ce6dc6c1b57040bdeffad63c 969 utils optional libnymea-networkmanager_0.1.1+201909161052~f3057c8~bionic.dsc
+ 02d2440567e8237df586c74c7311f355 26500 utils optional libnymea-networkmanager_0.1.1+201909161052~f3057c8~bionic.tar.xz
+ 90aa93b290a36293c29fe32f881bc1b5 11096 utils optional libnymea-networkmanager_0.1.1+201909161052~f3057c8~bionic_source.buildinfo

@@ -28,6 +28,7 @@
 #include <QLoggingCategory>
 
 Q_DECLARE_LOGGING_CATEGORY(dcNetworkManager)
+Q_DECLARE_LOGGING_CATEGORY(dcNetworkManagerBluetoothServer)
 
 class NetworkManagerUtils
 {
