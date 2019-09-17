@@ -71,6 +71,16 @@ void BluetoothServer::setSoftwareVersion(const QString &softwareVersion)
     m_softwareVersion = softwareVersion;
 }
 
+QString BluetoothServer::hardwareVersion() const
+{
+    return m_hardwareVersion;
+}
+
+void BluetoothServer::setHardwareVersion(const QString &hardwareVersion)
+{
+    m_hardwareVersion = hardwareVersion;
+}
+
 bool BluetoothServer::running() const
 {
     return m_running;

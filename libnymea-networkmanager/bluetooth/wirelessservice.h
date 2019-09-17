@@ -90,7 +90,6 @@ private:
     void commandScan(const QVariantMap &request);
     void commandGetCurrentConnection(const QVariantMap &request);
 
-
 private slots:
     // Service
     void characteristicChanged(const QLowEnergyCharacteristic &characteristic, const QByteArray &value);

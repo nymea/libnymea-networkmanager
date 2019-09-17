@@ -19,6 +19,7 @@
  *  <http://www.gnu.org/licenses/>.                                        *
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 #ifndef BLUETOOTHSERVER_H
 #define BLUETOOTHSERVER_H
 
