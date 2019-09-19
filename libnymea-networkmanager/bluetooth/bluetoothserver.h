@@ -51,12 +51,12 @@ public:
     explicit BluetoothServer(NetworkManager *networkManager);
     ~BluetoothServer();
 
+    QString advertiseName() const;
+    void setAdvertiseName(const QString &advertiseName);
+
     // Information for the device info service
     QString modelName() const;
     void setModelName(const QString &modelName);
-
-    QString serverName() const;
-    void setServerName(const QString &serverName);
 
     QString softwareVersion() const;
     void setSoftwareVersion(const QString &softwareVersion);
@@ -64,14 +64,19 @@ public:
     QString hardwareVersion() const;
     void setHardwareVersion(const QString &hardwareVersion);
 
+    QString serialNumber() const;
+    void setSerialNumber(const QString &serialNumber);
+
     bool running() const;
     bool connected() const;
 
 private:
+    QString m_advertiseName;
+
     QString m_modelName;
-    QString m_serverName;
     QString m_softwareVersion;
     QString m_hardwareVersion;
+    QString m_serialNumber;
 
     NetworkManager *m_networkManager = nullptr;
     QBluetoothLocalDevice *m_localDevice = nullptr;
@@ -93,6 +98,8 @@ private:
 
     void setRunning(bool running);
     void setConnected(bool connected);
+
+    QUuid readMachineId();
 
 signals:
     void runningChanged(const bool &running);

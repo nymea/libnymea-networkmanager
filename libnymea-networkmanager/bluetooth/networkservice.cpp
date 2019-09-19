@@ -51,7 +51,7 @@ QLowEnergyService *NetworkService::service()
     return m_service;
 }
 
-QLowEnergyServiceData NetworkService::serviceData()
+QLowEnergyServiceData NetworkService::serviceData(NetworkManager *networkManager)
 {
     QLowEnergyServiceData serviceData;
     serviceData.setType(QLowEnergyServiceData::ServiceTypePrimary);
@@ -65,7 +65,7 @@ QLowEnergyServiceData NetworkService::serviceData()
     networkStatusData.setValue(QByteArray(1, 0));
     networkStatusData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
     networkStatusData.addDescriptor(clientConfigDescriptorData);
-    networkStatusData.setValue(NetworkService::getNetworkManagerStateByteArray(NetworkManager::NetworkManagerStateUnknown));
+    networkStatusData.setValue(NetworkService::getNetworkManagerStateByteArray(networkManager->state()));
     serviceData.addCharacteristic(networkStatusData);
 
     // Network manager commander ef6d6612-b8af-49e0-9eca-ab343513641c
@@ -88,7 +88,7 @@ QLowEnergyServiceData NetworkService::serviceData()
     networkingEnabledStatusData.setUuid(networkingEnabledCharacteristicUuid);
     networkingEnabledStatusData.setValue(QByteArray(1, 0));
     networkingEnabledStatusData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
-    networkingEnabledStatusData.setValue(QByteArray::number(0));
+    networkingEnabledStatusData.setValue(QByteArray::number(static_cast<int>(networkManager->networkingEnabled())));
     serviceData.addCharacteristic(networkingEnabledStatusData);
 
     // Wireless enabled ef6d6615-b8af-49e0-9eca-ab343513641c
@@ -96,7 +96,7 @@ QLowEnergyServiceData NetworkService::serviceData()
     wirelessEnabledStatusData.setUuid(wirelessEnabledCharacteristicUuid);
     wirelessEnabledStatusData.setValue(QByteArray(1, 0));
     wirelessEnabledStatusData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
-    wirelessEnabledStatusData.setValue(QByteArray::number(0));
+    wirelessEnabledStatusData.setValue(QByteArray::number(static_cast<int>(networkManager->wirelessEnabled())));
     serviceData.addCharacteristic(wirelessEnabledStatusData);
 
     return serviceData;

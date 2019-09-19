@@ -23,6 +23,9 @@
 #include "../networkmanager.h"
 #include "../networkmanagerutils.h"
 
+#include <QFile>
+#include <QSysInfo>
+
 BluetoothServer::BluetoothServer(NetworkManager *networkManager) :
     QObject(networkManager),
     m_networkManager(networkManager)
@@ -41,6 +44,16 @@ BluetoothServer::~BluetoothServer()
 
 }
 
+QString BluetoothServer::advertiseName() const
+{
+    return m_advertiseName;
+}
+
+void BluetoothServer::setAdvertiseName(const QString &advertiseName)
+{
+    m_advertiseName = advertiseName;
+}
+
 QString BluetoothServer::modelName() const
 {
     return m_modelName;
@@ -49,16 +62,6 @@ QString BluetoothServer::modelName() const
 void BluetoothServer::setModelName(const QString &modelName)
 {
     m_modelName = modelName;
-}
-
-QString BluetoothServer::serverName() const
-{
-    return m_serverName;
-}
-
-void BluetoothServer::setServerName(const QString &serverName)
-{
-    m_serverName = serverName;
 }
 
 QString BluetoothServer::softwareVersion() const
@@ -79,6 +82,16 @@ QString BluetoothServer::hardwareVersion() const
 void BluetoothServer::setHardwareVersion(const QString &hardwareVersion)
 {
     m_hardwareVersion = hardwareVersion;
+}
+
+QString BluetoothServer::serialNumber() const
+{
+    return m_serialNumber;
+}
+
+void BluetoothServer::setSerialNumber(const QString &serialNumber)
+{
+    m_serialNumber = serialNumber;
 }
 
 bool BluetoothServer::running() const
@@ -108,6 +121,18 @@ QLowEnergyServiceData BluetoothServer::deviceInformationServiceData()
 
     modelNumberCharData.setProperties(QLowEnergyCharacteristic::Read);
     serviceData.addCharacteristic(modelNumberCharData);
+
+    // Serial number string 0x2a25
+    QLowEnergyCharacteristicData serialNumberCharData;
+    serialNumberCharData.setUuid(QBluetoothUuid::SerialNumberString);
+    if (m_serialNumber.isNull()) {
+        // Note: if no serialnumber specified use the system uuid from /etc/machine-id
+        qCWarning(dcNetworkManagerBluetoothServer()) << "Serial number not specified. Using system uuid from /etc/machine-id as serialnumber.";
+        m_serialNumber = readMachineId().toString();
+    }
+    serialNumberCharData.setValue(m_serialNumber.toUtf8());
+    serialNumberCharData.setProperties(QLowEnergyCharacteristic::Read);
+    serviceData.addCharacteristic(serialNumberCharData);
 
     // Firmware revision string 0x2a26
     QLowEnergyCharacteristicData firmwareRevisionCharData;
@@ -149,7 +174,11 @@ QLowEnergyServiceData BluetoothServer::genericAccessServiceData()
     // Device name 0x2a00
     QLowEnergyCharacteristicData nameCharData;
     nameCharData.setUuid(QBluetoothUuid::DeviceName);
-    nameCharData.setValue(m_serverName.toUtf8());
+    if (m_advertiseName.isNull()) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "Advertise name not specified. Using system host name as device name.";
+        m_advertiseName = QSysInfo::machineHostName();
+    }
+    nameCharData.setValue(m_advertiseName.toUtf8());
     nameCharData.setProperties(QLowEnergyCharacteristic::Read);
     serviceData.addCharacteristic(nameCharData);
 
@@ -208,6 +237,25 @@ void BluetoothServer::setConnected(bool connected)
 
     m_connected = connected;
     emit connectedChanged(m_connected);
+}
+
+QUuid BluetoothServer::readMachineId()
+{
+    QUuid systemUuid;
+    QFile systemUuidFile("/etc/machine-id");
+    if (systemUuidFile.open(QFile::ReadOnly)) {
+        QString tmpId = QString::fromLatin1(systemUuidFile.readAll()).trimmed();
+        tmpId.insert(8, "-");
+        tmpId.insert(13, "-");
+        tmpId.insert(18, "-");
+        tmpId.insert(23, "-");
+        systemUuid = QUuid(tmpId);
+    } else {
+        qWarning(dcNetworkManagerBluetoothServer()) << "Failed to open /etc/machine-id for reading the system uuid as device information serialnumber.";
+    }
+    systemUuidFile.close();
+
+    return systemUuid;
 }
 
 void BluetoothServer::onHostModeStateChanged(const QBluetoothLocalDevice::HostMode mode)
@@ -389,13 +437,15 @@ void BluetoothServer::start()
     m_genericAttributeService = m_controller->addService(genericAttributeServiceData(), m_controller);
 
     // Create custom services
-    m_networkService = new NetworkService(m_controller->addService(NetworkService::serviceData(), m_controller), m_networkManager, m_controller);
-    m_wirelessService = new WirelessService(m_controller->addService(WirelessService::serviceData(), m_controller), m_networkManager, m_controller);
+    m_networkService = new NetworkService(m_controller->addService(NetworkService::serviceData(m_networkManager), m_controller),
+                                          m_networkManager, m_controller);
+    m_wirelessService = new WirelessService(m_controller->addService(WirelessService::serviceData(m_networkManager), m_controller),
+                                            m_networkManager, m_controller);
 
     QLowEnergyAdvertisingData advertisingData;
     advertisingData.setDiscoverability(QLowEnergyAdvertisingData::DiscoverabilityGeneral);
     advertisingData.setIncludePowerLevel(true);
-    advertisingData.setLocalName(m_serverName);
+    advertisingData.setLocalName(m_advertiseName);
 
     // FIXME: set guh manufacturer SIG data once available
 
@@ -403,11 +453,10 @@ void BluetoothServer::start()
     QLowEnergyAdvertisingParameters advertisingParameters;
     advertisingParameters.setInterval(100,100);
 
-    qCDebug(dcNetworkManagerBluetoothServer()) << "Start advertising" << m_serverName << m_localDevice->address().toString();
+    qCDebug(dcNetworkManagerBluetoothServer()) << "Start advertising" << m_advertiseName << m_localDevice->address().toString();
     m_controller->startAdvertising(advertisingParameters, advertisingData, advertisingData);
 
-    // Start the advertising timer
-    setRunning(true);
+    // Note: setRunning(true) will be called when the service is really advertising, see onControllerStateChanged()
 }
 
 void BluetoothServer::stop()

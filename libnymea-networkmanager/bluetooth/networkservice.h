@@ -56,7 +56,7 @@ public:
 
     QLowEnergyService *service();
 
-    static QLowEnergyServiceData serviceData();
+    static QLowEnergyServiceData serviceData(NetworkManager *networkManager);
     static QByteArray getNetworkManagerStateByteArray(const NetworkManager::NetworkManagerState &state);
 
 private:

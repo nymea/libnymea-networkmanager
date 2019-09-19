@@ -63,7 +63,7 @@ public:
     explicit WirelessService(QLowEnergyService *service, NetworkManager *networkManager, QObject *parent = nullptr);
     QLowEnergyService *service();
 
-    static QLowEnergyServiceData serviceData();
+    static QLowEnergyServiceData serviceData(NetworkManager *networkManager);
 
 private:
     QLowEnergyService *m_service = nullptr;

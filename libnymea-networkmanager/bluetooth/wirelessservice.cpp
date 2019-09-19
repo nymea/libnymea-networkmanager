@@ -59,7 +59,7 @@ QLowEnergyService *WirelessService::service()
     return m_service;
 }
 
-QLowEnergyServiceData WirelessService::serviceData()
+QLowEnergyServiceData WirelessService::serviceData(NetworkManager *networkManager)
 {
     QLowEnergyServiceData serviceData;
     serviceData.setType(QLowEnergyServiceData::ServiceTypePrimary);
@@ -88,7 +88,11 @@ QLowEnergyServiceData WirelessService::serviceData()
     wirelessStatusCharacteristicData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
     wirelessStatusCharacteristicData.addDescriptor(clientConfigDescriptorData);
     wirelessStatusCharacteristicData.setValueLength(1, 1);
-    wirelessStatusCharacteristicData.setValue(WirelessService::getWirelessNetworkDeviceState(NetworkDevice::NetworkDeviceStateUnavailable));
+    if (networkManager->wirelessNetworkDevices().isEmpty()) {
+        wirelessStatusCharacteristicData.setValue(WirelessService::getWirelessNetworkDeviceState(NetworkDevice::NetworkDeviceStateUnknown));
+    } else {
+        wirelessStatusCharacteristicData.setValue(WirelessService::getWirelessNetworkDeviceState(networkManager->wirelessNetworkDevices().first()->deviceState()));
+    }
     serviceData.addCharacteristic(wirelessStatusCharacteristicData);
 
     return serviceData;
