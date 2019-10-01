@@ -20,6 +20,15 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*!
+    \class NetworkDevice
+    \brief Represents the base class of a network device.
+    \inmodule nymea-networkmanager
+    \ingroup networkmanager
+
+
+*/
+
 /*! \enum NetworkDevice::NetworkDeviceState
     \value NetworkDeviceStateUnknown
     \value NetworkDeviceStateUnmanaged

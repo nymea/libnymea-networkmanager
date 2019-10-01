@@ -20,14 +20,31 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*! \fn void WirelessNetworkDevice::bitRateChanged(const int &bitRate);
+/*!
+    \class WirelessNetworkDevice
+    \brief Represents a wireless network device.
+    \inmodule nymea-networkmanager
+    \ingroup networkmanager
+
+
+*/
+
+/*! \enum WirelessNetworkDevice::Mode
+    \value ModeUnknown
+    \value ModeAdhoc
+    \value ModeInfrastructure
+    \value ModeAccessPoint
+
+*/
+
+/*! \fn void WirelessNetworkDevice::bitRateChanged(int bitRate);
     This signal will be emitted when the \a bitRate of this \l{WirelessNetworkDevice} has changed.
 */
 
-/*! \fn void WirelessNetworkDevice::stateChanged(const NetworkDeviceState &state);
-    This signal will be emitted when the current \a state of this \l{WirelessNetworkDevice} has changed.
+/*! \fn void WirelessNetworkDevice::modeChanged(Mode mode);
+    This signal will be emitted when the current \a mode of this \l{WirelessNetworkDevice} has changed.
 
-    \sa NetworkDeviceState
+    \sa WirelessNetworkDevice::Mode
 */
 
 

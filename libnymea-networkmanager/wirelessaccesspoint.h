@@ -75,10 +75,10 @@ private:
 
     void setSsid(const QString &ssid);
     void setMacAddress(const QString &macAddress);
-    void setFrequency(const double &frequency);
-    void setSignalStrength(const int &signalStrength);
-    void setIsProtected(const bool &isProtected);
-    void setSecurityFlags(const WirelessAccessPoint::ApSecurityModes &securityFlags);
+    void setFrequency(double frequency);
+    void setSignalStrength(int signalStrength);
+    void setIsProtected(bool isProtected);
+    void setSecurityFlags(WirelessAccessPoint::ApSecurityModes securityFlags);
 
 signals:
     void signalStrengthChanged();

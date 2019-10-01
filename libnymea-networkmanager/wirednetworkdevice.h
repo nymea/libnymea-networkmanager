@@ -46,8 +46,8 @@ private:
     bool m_pluggedIn = false;
 
     void setMacAddress(const QString &macAddress);
-    void setBitRate(const int &bitRate);
-    void setPluggedIn(const bool &pluggedIn);
+    void setBitRate(int bitRate);
+    void setPluggedIn(bool pluggedIn);
 
 private slots:
     void propertiesChanged(const QVariantMap &properties);

@@ -20,7 +20,16 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*! \enum guhserver::WirelessAccessPoint::ApSecurityMode
+/*!
+    \class WirelessAccessPoint
+    \brief Represents a discovered wireless access point.
+    \inmodule nymea-networkmanager
+    \ingroup networkmanager
+
+
+*/
+
+/*! \enum WirelessAccessPoint::ApSecurityMode
     \value ApSecurityModeNone
     \value ApSecurityModePairWep40
     \value ApSecurityModePairWep104
@@ -97,7 +106,7 @@ double WirelessAccessPoint::frequency() const
     return m_frequency;
 }
 
-void WirelessAccessPoint::setFrequency(const double &frequency)
+void WirelessAccessPoint::setFrequency(double frequency)
 {
     m_frequency = frequency;
 }
@@ -108,13 +117,13 @@ int WirelessAccessPoint::signalStrength() const
     return m_signalStrength;
 }
 
-void WirelessAccessPoint::setSignalStrength(const int &signalStrength)
+void WirelessAccessPoint::setSignalStrength(int signalStrength)
 {
     m_signalStrength = signalStrength;
     emit signalStrengthChanged();
 }
 
-void WirelessAccessPoint::setIsProtected(const bool &isProtected)
+void WirelessAccessPoint::setIsProtected(bool isProtected)
 {
     m_isProtected = isProtected;
 }
@@ -125,13 +134,16 @@ bool WirelessAccessPoint::isProtected() const
     return m_isProtected;
 }
 
-/*! Returns the security flags of this \l{WirelessAccessPoint}. \sa WirelessAccessPoint::ApSecurityModes */
+/*! Returns the security flags of this \l{WirelessAccessPoint}.
+
+    \sa WirelessAccessPoint::ApSecurityModes
+*/
 WirelessAccessPoint::ApSecurityModes WirelessAccessPoint::securityFlags() const
 {
     return m_securityFlags;
 }
 
-void WirelessAccessPoint::setSecurityFlags(const WirelessAccessPoint::ApSecurityModes &securityFlags)
+void WirelessAccessPoint::setSecurityFlags(WirelessAccessPoint::ApSecurityModes securityFlags)
 {
     m_securityFlags = securityFlags;
 }

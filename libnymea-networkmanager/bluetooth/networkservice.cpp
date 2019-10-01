@@ -20,6 +20,14 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*!
+    \class NetworkService
+    \brief Represents a bluetooth LE service interfacing the network-manager.
+    \inmodule nymea-networkmanager
+    \ingroup networkmanager-bluetooth
+
+*/
+
 #include "networkservice.h"
 #include "bluetoothuuids.h"
 

@@ -20,6 +20,16 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*!
+    \class NetworkManager
+    \brief Represents the main network-manager instance.
+    \inmodule nymea-networkmanager
+    \ingroup networkmanager
+
+
+
+*/
+
 #include "networkmanager.h"
 #include "networkconnection.h"
 

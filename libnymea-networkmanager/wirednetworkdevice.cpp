@@ -20,6 +20,16 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*!
+    \class WiredNetworkDevice
+    \brief Represents a wired network device.
+    \inmodule nymea-networkmanager
+    \ingroup networkmanager
+
+
+*/
+
+
 #include "wirednetworkdevice.h"
 
 #include <QDebug>
@@ -70,12 +80,12 @@ void WiredNetworkDevice::setMacAddress(const QString &macAddress)
     m_macAddress = macAddress;
 }
 
-void WiredNetworkDevice::setBitRate(const int &bitRate)
+void WiredNetworkDevice::setBitRate(int bitRate)
 {
     m_bitRate = bitRate;
 }
 
-void WiredNetworkDevice::setPluggedIn(const bool &pluggedIn)
+void WiredNetworkDevice::setPluggedIn(bool pluggedIn)
 {
     m_pluggedIn = pluggedIn;
 }

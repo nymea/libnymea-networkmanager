@@ -19,6 +19,15 @@
  *  <http://www.gnu.org/licenses/>.                                        *
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/*!
+    \class BluetoothServer
+    \brief Represents a bluetooth LE server for network-manager remote configuration.
+    \inmodule nymea-networkmanager
+    \ingroup networkmanager-bluetooth
+
+*/
+
 #include "bluetoothserver.h"
 #include "../networkmanager.h"
 #include "../networkmanagerutils.h"

@@ -20,6 +20,15 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/*!
+    \class NetworkConnection
+    \brief Represents a network connection configuration.
+    \inmodule nymea-networkmanager
+    \ingroup networkmanager
+
+*/
+
+
 #include "networkconnection.h"
 #include "networkmanagerutils.h"
 
