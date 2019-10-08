@@ -60,6 +60,7 @@ WirelessService::WirelessService(QLowEnergyService *service, NetworkManager *net
     m_device = m_networkManager->wirelessNetworkDevices().first();
     connect(m_device, &WirelessNetworkDevice::bitRateChanged, this, &WirelessService::onWirelessDeviceBitRateChanged);
     connect(m_device, &WirelessNetworkDevice::stateChanged, this, &WirelessService::onWirelessDeviceStateChanged);
+    connect(m_device, &WirelessNetworkDevice::modeChanged, this, &WirelessService::onWirelessModeChanged);
 }
 
 QLowEnergyService *WirelessService::service()
@@ -102,6 +103,19 @@ QLowEnergyServiceData WirelessService::serviceData(NetworkManager *networkManage
         wirelessStatusCharacteristicData.setValue(WirelessService::getWirelessNetworkDeviceState(networkManager->wirelessNetworkDevices().first()->deviceState()));
     }
     serviceData.addCharacteristic(wirelessStatusCharacteristicData);
+
+    // Wireless mode characterisitc e081fec4-f757-4449-b9c9-bfa83133f7fc
+    QLowEnergyCharacteristicData wirelessModeCharacteristicData;
+    wirelessModeCharacteristicData.setUuid(wirelessModeCharacteristicUuid);
+    wirelessModeCharacteristicData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
+    wirelessModeCharacteristicData.addDescriptor(clientConfigDescriptorData);
+    wirelessModeCharacteristicData.setValueLength(1, 1);
+    if (networkManager->wirelessNetworkDevices().isEmpty()) {
+        wirelessModeCharacteristicData.setValue(WirelessService::getWirelessMode(WirelessNetworkDevice::ModeUnknown));
+    } else {
+        wirelessModeCharacteristicData.setValue(WirelessService::getWirelessMode(networkManager->wirelessNetworkDevices().first()->mode()));
+    }
+    serviceData.addCharacteristic(wirelessModeCharacteristicData);
 
     return serviceData;
 }
@@ -162,6 +176,23 @@ QByteArray WirelessService::getWirelessNetworkDeviceState(const NetworkDevice::N
         return QByteArray::fromHex("0b");
     case NetworkDevice::NetworkDeviceStateFailed:
         return QByteArray::fromHex("0c");
+    }
+
+    // Unknown
+    return QByteArray::fromHex("00");
+}
+
+QByteArray WirelessService::getWirelessMode(WirelessNetworkDevice::Mode mode)
+{
+    switch (mode) {
+    case WirelessNetworkDevice::ModeUnknown:
+        return QByteArray::fromHex("00");
+    case WirelessNetworkDevice::ModeAdhoc:
+        return QByteArray::fromHex("01");
+    case WirelessNetworkDevice::ModeInfrastructure:
+        return QByteArray::fromHex("02");
+    case WirelessNetworkDevice::ModeAccessPoint:
+        return QByteArray::fromHex("03");
     }
 
     // Unknown
@@ -359,6 +390,36 @@ void WirelessService::commandGetCurrentConnection(const QVariantMap &request)
     streamData(response);
 }
 
+void WirelessService::commandStartAccessPoint(const QVariantMap &request)
+{
+    if (!m_service) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Could not start access point. Service is not valid.";
+        return;
+    }
+
+    QLowEnergyCharacteristic characteristic = m_service->characteristic(wirelessResponseCharacteristicUuid);
+    if (!characteristic.isValid()) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Wireless response characteristic not valid";
+        return;
+    }
+
+    if (!request.contains("p")) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Start access point command: Missing parameters.";
+        streamData(createResponse(WirelessServiceCommandStartAccessPoint, WirelessServiceResponseIvalidParameters));
+        return;
+    }
+
+    QVariantMap parameters = request.value("p").toMap();
+    if (!parameters.contains("e") || !parameters.contains("p")) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Start access point command: Invalid parameters.";
+        streamData(createResponse(WirelessServiceCommandStartAccessPoint, WirelessServiceResponseIvalidParameters));
+        return;
+    }
+
+    m_networkManager->startAccessPoint(m_device->interface(), parameters.value("e").toString(), parameters.value("p").toString());
+    streamData(createResponse(WirelessServiceCommandStartAccessPoint));
+}
+
 void WirelessService::characteristicChanged(const QLowEnergyCharacteristic &characteristic, const QByteArray &value)
 {
     // Command
@@ -493,6 +554,9 @@ void WirelessService::processCommand(const QVariantMap &request)
     case WirelessServiceCommandGetCurrentConnection:
         commandGetCurrentConnection(request);
         break;
+    case WirelessServiceCommandStartAccessPoint:
+        commandStartAccessPoint(request);
+        break;
     default:
         qCWarning(dcNetworkManagerBluetoothServer()) << "Invalid request. Unknown command" << command;
         streamData(createResponse(WirelessServiceCommandConnect, WirelessServiceResponseIvalidCommand));
@@ -521,4 +585,21 @@ void WirelessService::onWirelessDeviceStateChanged(const NetworkDevice::NetworkD
     }
 
     m_service->writeCharacteristic(characteristic, WirelessService::getWirelessNetworkDeviceState(state));
+}
+
+void WirelessService::onWirelessModeChanged(WirelessNetworkDevice::Mode mode)
+{
+    if (!m_service) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Could not update wireless device mode. Service not valid";
+        return;
+    }
+
+    QLowEnergyCharacteristic characteristic = m_service->characteristic(wirelessModeCharacteristicUuid);
+    if (!characteristic.isValid()) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Could not update wireless device mode. Characteristic not valid";
+        return;
+    }
+
+    qCDebug(dcNetworkManagerBluetoothServer()) << "WirelessService: Notify wireless mode changed" << WirelessService::getWirelessMode(mode);
+    m_service->writeCharacteristic(characteristic, WirelessService::getWirelessMode(mode));
 }
