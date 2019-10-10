@@ -1,23 +1,34 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                               *
- * Copyright (C) 2018 Simon Stürz <simon.stuerz@guh.io>                          *
- *                                                                               *
- * This file is part of libnymea-networkmanager.                                 *
- *                                                                               *
- * libnymea-networkmanager is free software: you can redistribute it and/or      *
- * modify it under the terms of the GNU General Public License as published by   *
- * the Free Software Foundation, either version 3 of the License,                *
- * or (at your option) any later version.                                        *
- *                                                                               *
- * libnymea-networkmanager is distributed in the hope that it will be useful,    *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of                *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  *
- * GNU General Public License for more details.                                  *
- *                                                                               *
- * You should have received a copy of the GNU General Public License along       *
- * with libnymea-networkmanager. If not, see <http://www.gnu.org/licenses/>.     *
- *                                                                               *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                                         *
+ * Copyright (C) 2018-2019 Simon Stürz <simon.stuerz@nymea.io>             *
+ *                                                                         *
+ * This file is part of libnymea-networkmanager.                           *
+ *                                                                         *
+ *  This library is free software; you can redistribute it and/or          *
+ *  modify it under the terms of the GNU Lesser General Public             *
+ *  License as published by the Free Software Foundation; either           *
+ *  version 2.1 of the License, or (at your option) any later version.     *
+ *                                                                         *
+ *  This library is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
+ *  Lesser General Public License for more details.                        *
+ *                                                                         *
+ *  You should have received a copy of the GNU Lesser General Public       *
+ *  License along with this library; If not, see                           *
+ *  <http://www.gnu.org/licenses/>.                                        *
+ *                                                                         *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/*!
+    \class WiredNetworkDevice
+    \brief Represents a wired network device.
+    \inmodule nymea-networkmanager
+    \ingroup networkmanager
+
+
+*/
+
 
 #include "wirednetworkdevice.h"
 
@@ -69,12 +80,12 @@ void WiredNetworkDevice::setMacAddress(const QString &macAddress)
     m_macAddress = macAddress;
 }
 
-void WiredNetworkDevice::setBitRate(const int &bitRate)
+void WiredNetworkDevice::setBitRate(int bitRate)
 {
     m_bitRate = bitRate;
 }
 
-void WiredNetworkDevice::setPluggedIn(const bool &pluggedIn)
+void WiredNetworkDevice::setPluggedIn(bool pluggedIn)
 {
     m_pluggedIn = pluggedIn;
 }

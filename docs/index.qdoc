@@ -1,0 +1,14 @@
+/*!
+    \page index.html
+    \title libnymea-networkmanager documentation
+
+    The libnymea-networkmanager library allowes to interact with the network-manager DBus API and optional start also a Bluetooth LE server for remote network set up.
+
+    \chapter Classes network-manager
+    \annotatedlist networkmanager
+
+    \chapter Classes network-manager bluetooth
+    \annotatedlist networkmanager-bluetooth
+
+*/
+

@@ -1,25 +1,35 @@
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                                                               *
- * Copyright (C) 2018 Simon Stürz <simon.stuerz@guh.io>                          *
- *                                                                               *
- * This file is part of libnymea-networkmanager.                                 *
- *                                                                               *
- * libnymea-networkmanager is free software: you can redistribute it and/or      *
- * modify it under the terms of the GNU General Public License as published by   *
- * the Free Software Foundation, either version 3 of the License,                *
- * or (at your option) any later version.                                        *
- *                                                                               *
- * libnymea-networkmanager is distributed in the hope that it will be useful,    *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of                *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                  *
- * GNU General Public License for more details.                                  *
- *                                                                               *
- * You should have received a copy of the GNU General Public License along       *
- * with libnymea-networkmanager. If not, see <http://www.gnu.org/licenses/>.     *
- *                                                                               *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ *                                                                         *
+ * Copyright (C) 2018-2019 Simon Stürz <simon.stuerz@nymea.io>             *
+ *                                                                         *
+ * This file is part of libnymea-networkmanager.                           *
+ *                                                                         *
+ *  This library is free software; you can redistribute it and/or          *
+ *  modify it under the terms of the GNU Lesser General Public             *
+ *  License as published by the Free Software Foundation; either           *
+ *  version 2.1 of the License, or (at your option) any later version.     *
+ *                                                                         *
+ *  This library is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU      *
+ *  Lesser General Public License for more details.                        *
+ *                                                                         *
+ *  You should have received a copy of the GNU Lesser General Public       *
+ *  License along with this library; If not, see                           *
+ *  <http://www.gnu.org/licenses/>.                                        *
+ *                                                                         *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*! \enum guhserver::WirelessAccessPoint::ApSecurityMode
+/*!
+    \class WirelessAccessPoint
+    \brief Represents a discovered wireless access point.
+    \inmodule nymea-networkmanager
+    \ingroup networkmanager
+
+
+*/
+
+/*! \enum WirelessAccessPoint::ApSecurityMode
     \value ApSecurityModeNone
     \value ApSecurityModePairWep40
     \value ApSecurityModePairWep104
@@ -96,7 +106,7 @@ double WirelessAccessPoint::frequency() const
     return m_frequency;
 }
 
-void WirelessAccessPoint::setFrequency(const double &frequency)
+void WirelessAccessPoint::setFrequency(double frequency)
 {
     m_frequency = frequency;
 }
@@ -107,13 +117,13 @@ int WirelessAccessPoint::signalStrength() const
     return m_signalStrength;
 }
 
-void WirelessAccessPoint::setSignalStrength(const int &signalStrength)
+void WirelessAccessPoint::setSignalStrength(int signalStrength)
 {
     m_signalStrength = signalStrength;
     emit signalStrengthChanged();
 }
 
-void WirelessAccessPoint::setIsProtected(const bool &isProtected)
+void WirelessAccessPoint::setIsProtected(bool isProtected)
 {
     m_isProtected = isProtected;
 }
@@ -124,13 +134,16 @@ bool WirelessAccessPoint::isProtected() const
     return m_isProtected;
 }
 
-/*! Returns the security flags of this \l{WirelessAccessPoint}. \sa WirelessAccessPoint::ApSecurityModes */
+/*! Returns the security flags of this \l{WirelessAccessPoint}.
+
+    \sa WirelessAccessPoint::ApSecurityModes
+*/
 WirelessAccessPoint::ApSecurityModes WirelessAccessPoint::securityFlags() const
 {
     return m_securityFlags;
 }
 
-void WirelessAccessPoint::setSecurityFlags(const WirelessAccessPoint::ApSecurityModes &securityFlags)
+void WirelessAccessPoint::setSecurityFlags(WirelessAccessPoint::ApSecurityModes securityFlags)
 {
     m_securityFlags = securityFlags;
 }

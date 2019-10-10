@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *                                                                         *
- * Copyright (C) 2018-2019 Simon Stürz <simon.stuerz@nymea.io>             *
+ * Copyright (C) 2019 Simon Stürz <simon.stuerz@nymea.io>                  *
  *                                                                         *
  * This file is part of libnymea-networkmanager.                           *
  *                                                                         *
@@ -20,50 +20,22 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef NETWORKCONNECTION_H
-#define NETWORKCONNECTION_H
+#ifndef BLUETOOTHUUIDS_H
+#define BLUETOOTHUUIDS_H
 
-#include <QUuid>
-#include <QDebug>
-#include <QObject>
-#include <QDateTime>
-#include <QDBusMetaType>
-#include <QDBusObjectPath>
-#include <QDBusConnection>
-#include <QDBusInterface>
-#include <QDBusArgument>
+#include <QBluetoothUuid>
 
-typedef QMap<QString, QVariantMap> ConnectionSettings;
+static QBluetoothUuid networkServiceUuid =                  QBluetoothUuid(QUuid("ef6d6610-b8af-49e0-9eca-ab343513641c"));
+static QBluetoothUuid networkStatusCharacteristicUuid =     QBluetoothUuid(QUuid("ef6d6611-b8af-49e0-9eca-ab343513641c"));
+static QBluetoothUuid networkCommanderCharacteristicUuid =  QBluetoothUuid(QUuid("ef6d6612-b8af-49e0-9eca-ab343513641c"));
+static QBluetoothUuid networkResponseCharacteristicUuid =   QBluetoothUuid(QUuid("ef6d6613-b8af-49e0-9eca-ab343513641c"));
+static QBluetoothUuid networkingEnabledCharacteristicUuid = QBluetoothUuid(QUuid("ef6d6614-b8af-49e0-9eca-ab343513641c"));
+static QBluetoothUuid wirelessEnabledCharacteristicUuid =   QBluetoothUuid(QUuid("ef6d6615-b8af-49e0-9eca-ab343513641c"));
 
-class NetworkConnection : public QObject
-{
-    Q_OBJECT
-public:
-    explicit NetworkConnection(const QDBusObjectPath &objectPath, QObject *parent = nullptr);
+static QBluetoothUuid wirelessServiceUuid =                 QBluetoothUuid(QUuid("e081fec0-f757-4449-b9c9-bfa83133f7fc"));
+static QBluetoothUuid wirelessCommanderCharacteristicUuid = QBluetoothUuid(QUuid("e081fec1-f757-4449-b9c9-bfa83133f7fc"));
+static QBluetoothUuid wirelessResponseCharacteristicUuid =  QBluetoothUuid(QUuid("e081fec2-f757-4449-b9c9-bfa83133f7fc"));
+static QBluetoothUuid wirelessStateCharacteristicUuid =     QBluetoothUuid(QUuid("e081fec3-f757-4449-b9c9-bfa83133f7fc"));
+static QBluetoothUuid wirelessModeCharacteristicUuid =      QBluetoothUuid(QUuid("e081fec4-f757-4449-b9c9-bfa83133f7fc"));
 
-    void deleteConnection();
-
-    static void registerTypes();
-
-    QDBusObjectPath objectPath() const;
-    ConnectionSettings connectionSettings() const;
-
-    QString id() const;
-    QString name() const;
-    QString type() const;
-    QUuid uuid() const;
-    QString interfaceName() const;
-    bool autoconnect() const;
-    QDateTime timeStamp() const;
-
-private:
-    QDBusObjectPath m_objectPath;
-    QDBusInterface *m_connectionInterface = nullptr;
-
-    ConnectionSettings m_connectionSettings;
-};
-
-Q_DECLARE_METATYPE(ConnectionSettings)
-QDebug operator<<(QDebug debug, NetworkConnection *networkConnection);
-
-#endif // NETWORKCONNECTION_H
+#endif // BLUETOOTHUUIDS_H

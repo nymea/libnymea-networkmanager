@@ -6,6 +6,8 @@ QT += dbus network
 QMAKE_CXXFLAGS *= -Werror -std=c++11 -g
 QMAKE_LFLAGS *= -std=c++11
 
+DEFINES += VERSION_STRING=\\\"$${VERSION_STRING}\\\"
+
 HEADERS += \
     networkmanager.h \
     networkconnection.h \
@@ -14,7 +16,7 @@ HEADERS += \
     wirednetworkdevice.h \
     wirelessaccesspoint.h \
     wirelessnetworkdevice.h \
-    networkmanagerutils.h \
+    networkmanagerutils.h
 
 SOURCES += \
     networkmanager.cpp \
@@ -24,8 +26,26 @@ SOURCES += \
     wirednetworkdevice.cpp \
     wirelessaccesspoint.cpp \
     wirelessnetworkdevice.cpp \
-    networkmanagerutils.cpp \
+    networkmanagerutils.cpp
 
+equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 7) {
+    message(Building with Bluetooth LE server functionality. Qt $${QT_VERSION}.)
+
+    QT += bluetooth
+
+    HEADERS += \
+        bluetooth/bluetoothserver.h \
+        bluetooth/bluetoothuuids.h \
+        bluetooth/networkservice.h \
+        bluetooth/wirelessservice.h \
+
+    SOURCES += \
+        bluetooth/bluetoothserver.cpp \
+        bluetooth/networkservice.cpp \
+        bluetooth/wirelessservice.cpp \
+} else {
+    message(Bluetooth LE server functionality not supported with Qt $${QT_VERSION}.)
+}
 
 target.path = $$[QT_INSTALL_LIBS]
 INSTALLS += target

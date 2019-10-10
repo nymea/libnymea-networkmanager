@@ -1,0 +1,12 @@
+HTML.templatedir = .
+
+HTML.postpostheader = \
+    "<div class=\"content mainContent\">\n"
+
+HTML.prologue = \
+    "<div class=\"context\">\n"
+
+HTML.footer = \
+    "</div>\n" \
+    "</div>\n"
+

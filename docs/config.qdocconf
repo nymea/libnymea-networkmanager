@@ -1,0 +1,31 @@
+include(html-template.qdocconf)
+
+project = libnymea-networkmanager
+description = libnymea-networkmanager documentation
+
+dita.metadata.default.author      = Simon Stürz
+dita.metadata.default.permissions = all
+dita.metadata.default.publisher   = guh GmbH
+dita.metadata.default.copyryear = 2019
+dita.metadata.default.copyrholder = Simon Stürz
+dita.metadata.default.audience = programmer
+
+outputdir = html
+outputformats = HTML
+
+language = Cpp
+
+naturallanguage         = en_US
+outputencoding          = UTF-8
+sourceencoding          = UTF-8
+
+syntaxhighlighting = true
+
+headerdirs = ../libnymea-networkmanager
+sourcedirs = ../libnymea-networkmanager ../docs
+
+headers.fileextensions = "*.h"
+sources.fileextensions = "*.cpp *.qdoc"
+
+Cpp.ignoredirectives = Q_DECLARE_METATYPE Q_DECLARE_LOGGING_CATEGORY Q_LOGGING_CATEGORY Q_ENUM
+
