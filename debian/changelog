@@ -1,6 +1,9 @@
-libnymea-networkmanager (0.2.0) UNRELEASED; urgency=medium
+libnymea-networkmanager (0.2.0) xenial; urgency=medium
+  [ Simon Stürz ]
+  * Update pkgconfig and include dir path
+  * Add Bluetooth LE server for configuring the network
 
- -- Simon Stürz <simon.stuerz@nymea.io>  Wed, 09 Oct 2019 09:48:37 +0200
+ -- Jenkins <jenkins@nymea.io>  Thu, 10 Oct 2019 22:55:56 +0200
 
 libnymea-networkmanager (0.1.1) xenial; urgency=medium
 
