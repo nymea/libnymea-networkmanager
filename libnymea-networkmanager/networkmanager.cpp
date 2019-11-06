@@ -154,6 +154,8 @@ NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &i
     connectionSettings.insert("id", ssid);
     connectionSettings.insert("uuid", QUuid::createUuid().toString().remove("{").remove("}"));
     connectionSettings.insert("type", "802-11-wireless");
+    connectionSettings.insert("autoconnect-retries", 0); // 0 = forever, -1 = default (4 retries)
+
 
     QVariantMap wirelessSettings;
     wirelessSettings.insert("ssid", ssid.toUtf8());
@@ -162,8 +164,7 @@ NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &i
     // Note: disable power save mode
     wirelessSettings.insert("powersave", 2);
 
-    if (hidden)
-        wirelessSettings.insert("hidden", true);
+    if (hidden) wirelessSettings.insert("hidden", true);
 
     QVariantMap wirelessSecuritySettings;
     wirelessSecuritySettings.insert("auth-alg", "open");
@@ -246,6 +247,7 @@ NetworkManager::NetworkManagerError NetworkManager::startAccessPoint(const QStri
     QVariantMap wirelessSecuritySettings;
     wirelessSecuritySettings.insert("key-mgmt", "wpa-psk");
     wirelessSecuritySettings.insert("psk", password);
+    wirelessSecuritySettings.insert("proto", "rsn"); // Force WPA2
 
     QVariantMap ipv4Settings;
     ipv4Settings.insert("method", "shared");
