@@ -148,6 +148,8 @@ NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &i
 
     // Note: https://developer.gnome.org/NetworkManager/stable/ref-settings.html
 
+    qCDebug(dcNetworkManager()) << "Start connecting to" << accessPoint << "hidden:" << hidden;
+
     // Create network settings for this wifi
     QVariantMap connectionSettings;
     connectionSettings.insert("autoconnect", true);
@@ -162,8 +164,10 @@ NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &i
     // Note: disable power save mode
     wirelessSettings.insert("powersave", 2);
 
-    if (hidden)
+    if (hidden) {
+
         wirelessSettings.insert("hidden", true);
+    }
 
     QVariantMap wirelessSecuritySettings;
     wirelessSecuritySettings.insert("auth-alg", "open");
@@ -182,7 +186,9 @@ NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &i
     settings.insert("802-11-wireless", wirelessSettings);
     settings.insert("ipv4", ipv4Settings);
     settings.insert("ipv6", ipv6Settings);
-    settings.insert("802-11-wireless-security", wirelessSecuritySettings);
+
+    if (accessPoint->isProtected())
+        settings.insert("802-11-wireless-security", wirelessSecuritySettings);
 
     // Remove old configuration (if there is any)
     foreach (NetworkConnection *connection, m_networkSettings->connections()) {
@@ -225,7 +231,6 @@ NetworkManager::NetworkManagerError NetworkManager::startAccessPoint(const QStri
     if (!wirelessNetworkDevice)
         return NetworkManagerErrorInvalidNetworkDeviceType;
 
-
     // Note: https://developer.gnome.org/NetworkManager/stable/ref-settings.html
 
     // Create network settings for access point
@@ -238,7 +243,7 @@ NetworkManager::NetworkManagerError NetworkManager::startAccessPoint(const QStri
     QVariantMap wirelessSettings;
     wirelessSettings.insert("band", "bg");
     wirelessSettings.insert("mode", "ap");
-    wirelessSettings.insert("ssid", ssid.toUtf8());
+    wirelessSettings.insert("ssid", ssid.toUtf8());    
     wirelessSettings.insert("security", "802-11-wireless-security");
     // Note: disable power save mode
     wirelessSettings.insert("powersave", 2);
@@ -382,6 +387,10 @@ bool NetworkManager::init()
 
     setAvailable(true);
     qCDebug(dcNetworkManager()) << "Network manager initialized successfully.";
+    qCDebug(dcNetworkManager()) << "Start initial wireless network scan...";
+    foreach (WirelessNetworkDevice *wirelessDevice, m_wirelessNetworkDevices.values()) {
+        wirelessDevice->scanWirelessNetworks();
+    }
 
     return true;
 }

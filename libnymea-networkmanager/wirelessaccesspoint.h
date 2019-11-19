@@ -34,7 +34,6 @@
 class WirelessAccessPoint : public QObject
 {
     Q_OBJECT
-    Q_FLAGS(ApSecurityModes)
 
 public:
     enum ApSecurityMode {
@@ -49,8 +48,21 @@ public:
         ApSecurityModeGroupCcmp    = 0x080,
         ApSecurityModeKeyMgmtPsk   = 0x100,
         ApSecurityModeKeyMgmt8021X = 0x200,
+        ApSecurityModeKeyMgmtSae   = 0x400
     };
     Q_DECLARE_FLAGS(ApSecurityModes, ApSecurityMode)
+    Q_FLAG(ApSecurityModes)
+
+
+    enum ApCapabilities {
+        ApCapabilitiesNone = 0x00,
+        ApCapabilitiesPrivacy = 0x01,
+        ApCapabilitiesWps = 0x02,
+        ApCapabilitiesWpsPushButton = 0x04,
+        ApCapabilitiesWpsPin = 0x08
+    };
+    Q_DECLARE_FLAGS(ApFlags, ApCapabilities)
+    Q_FLAG(ApCapabilities)
 
     explicit WirelessAccessPoint(const QDBusObjectPath &objectPath, QObject *parent = nullptr);
 
@@ -62,7 +74,9 @@ public:
     int signalStrength() const;
     bool isProtected() const;
 
-    WirelessAccessPoint::ApSecurityModes securityFlags() const;
+    WirelessAccessPoint::ApFlags capabilities() const;
+    WirelessAccessPoint::ApSecurityModes wpaFlags() const;
+    WirelessAccessPoint::ApSecurityModes rsnFlags() const;
 
 private:
     QDBusObjectPath m_objectPath;
@@ -71,14 +85,17 @@ private:
     double m_frequency;
     int m_signalStrength = 0;
     bool m_isProtected = false;
-    WirelessAccessPoint::ApSecurityModes m_securityFlags = ApSecurityModeNone;
+    WirelessAccessPoint::ApFlags m_capabilities = ApCapabilitiesNone;
+    WirelessAccessPoint::ApSecurityModes m_wpaFlags = ApSecurityModeNone;
+    WirelessAccessPoint::ApSecurityModes m_rsnFlags = ApSecurityModeNone;
 
     void setSsid(const QString &ssid);
     void setMacAddress(const QString &macAddress);
     void setFrequency(double frequency);
     void setSignalStrength(int signalStrength);
+    void setWpaFlags(WirelessAccessPoint::ApSecurityModes wpaFlags);
+    void setRsnFlags(WirelessAccessPoint::ApSecurityModes rsnFlags);
     void setIsProtected(bool isProtected);
-    void setSecurityFlags(WirelessAccessPoint::ApSecurityModes securityFlags);
 
 signals:
     void signalStrengthChanged();
@@ -89,5 +106,8 @@ private slots:
 };
 
 QDebug operator<<(QDebug debug, WirelessAccessPoint *accessPoint);
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(WirelessAccessPoint::ApSecurityModes)
+Q_DECLARE_OPERATORS_FOR_FLAGS(WirelessAccessPoint::ApFlags)
 
 #endif // WIRELESSACCESSPOINT_H

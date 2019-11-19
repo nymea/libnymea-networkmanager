@@ -309,6 +309,7 @@ void WirelessService::commandConnect(const QVariantMap &request)
 void WirelessService::commandConnectHidden(const QVariantMap &request)
 {
     Q_UNUSED(request)
+
     // TODO:
     qCWarning(dcNetworkManagerBluetoothServer()) << "Connect to hidden network is not implemented yet.";
 }
@@ -535,6 +536,7 @@ void WirelessService::processCommand(const QVariantMap &request)
     }
 
     // Process method
+    qCDebug(dcNetworkManagerBluetoothServer()) << "Received command" << static_cast<WirelessServiceCommand>(command);
     switch (command) {
     case WirelessServiceCommandGetNetworks:
         commandGetNetworks(request);

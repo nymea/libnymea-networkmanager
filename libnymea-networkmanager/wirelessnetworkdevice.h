@@ -69,6 +69,7 @@ private:
     int m_bitRate;
     QString m_macAddress;
     Mode m_mode = ModeUnknown;
+    int m_lastScan = -1;
     QDBusObjectPath m_activeAccessPointObjectPath;
 
     QHash<QDBusObjectPath, WirelessAccessPoint *> m_accessPointsTable;
@@ -78,6 +79,7 @@ private:
     void setMacAddress(const QString &macAddress);
     void setMode(Mode mode);
     void setBitrate(int bitRate);
+    void setLastScan(int lastScan);
     void setActiveAccessPoint(const QDBusObjectPath &activeAccessPointObjectPath);
 
 private slots:
