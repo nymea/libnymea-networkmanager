@@ -164,10 +164,7 @@ NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &i
     // Note: disable power save mode
     wirelessSettings.insert("powersave", 2);
 
-    if (hidden) {
-
-        wirelessSettings.insert("hidden", true);
-    }
+    if (hidden) wirelessSettings.insert("hidden", true);
 
     QVariantMap wirelessSecuritySettings;
     wirelessSecuritySettings.insert("auth-alg", "open");
