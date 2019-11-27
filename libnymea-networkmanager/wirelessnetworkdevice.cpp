@@ -184,6 +184,11 @@ void WirelessNetworkDevice::setBitrate(int bitRate)
     }
 }
 
+void WirelessNetworkDevice::setLastScan(int lastScan)
+{
+    m_lastScan = lastScan;
+}
+
 void WirelessNetworkDevice::setActiveAccessPoint(const QDBusObjectPath &activeAccessPointObjectPath)
 {
     if (m_activeAccessPointObjectPath != activeAccessPointObjectPath) {
