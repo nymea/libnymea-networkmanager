@@ -104,5 +104,5 @@ QDebug operator<<(QDebug debug, WiredNetworkDevice *networkDevice)
     debug.nospace() << networkDevice->bitRate() <<  " [Mb/s], ";
     debug.nospace() << networkDevice->pluggedIn() <<  ", ";
     debug.nospace() << networkDevice->deviceStateString() <<  ") ";
-    return debug;
+    return debug.space();
 }

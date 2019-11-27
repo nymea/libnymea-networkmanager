@@ -139,5 +139,5 @@ QDebug operator<<(QDebug debug, NetworkConnection *networkConnection)
     debug.nospace() << networkConnection->interfaceName() << ", ";
     debug.nospace() << networkConnection->type() << ", ";
     debug.nospace() << networkConnection->timeStamp().toString("dd.MM.yyyy hh:mm") << ") ";
-    return debug;
+    return debug.space();
 }

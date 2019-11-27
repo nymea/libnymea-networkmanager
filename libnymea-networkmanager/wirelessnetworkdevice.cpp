@@ -110,7 +110,7 @@ WirelessAccessPoint *WirelessNetworkDevice::activeAccessPoint()
 /*! Perform a wireless network scan on this \l{WirelessNetworkDevice}. */
 void WirelessNetworkDevice::scanWirelessNetworks()
 {
-    qCDebug(dcNetworkManager()) << this << "Request scan";
+    qCDebug(dcNetworkManager()) << "Request scan" << this;
     QDBusMessage query = m_wirelessInterface->call("RequestScan", QVariantMap());
     if (query.type() != QDBusMessage::ReplyMessage) {
         qCWarning(dcNetworkManager()) << "Scan error:" << query.errorName() << query.errorMessage();
@@ -132,6 +132,7 @@ WirelessAccessPoint *WirelessNetworkDevice::getAccessPoint(const QString &ssid)
             return accessPoint;
     }
     return nullptr;
+
 }
 
 /*! Returns the \l{WirelessAccessPoint} with the given \a objectPath. If the \l{WirelessAccessPoint} could not be found, return nullptr. */
@@ -183,6 +184,11 @@ void WirelessNetworkDevice::setBitrate(int bitRate)
     }
 }
 
+void WirelessNetworkDevice::setLastScan(int lastScan)
+{
+    m_lastScan = lastScan;
+}
+
 void WirelessNetworkDevice::setActiveAccessPoint(const QDBusObjectPath &activeAccessPointObjectPath)
 {
     if (m_activeAccessPointObjectPath != activeAccessPointObjectPath) {
@@ -206,17 +212,17 @@ void WirelessNetworkDevice::accessPointAdded(const QDBusObjectPath &objectPath)
 {
     QDBusInterface accessPointInterface(NetworkManagerUtils::networkManagerServiceString(), objectPath.path(), NetworkManagerUtils::accessPointInterfaceString(), QDBusConnection::systemBus());
     if (!accessPointInterface.isValid()) {
-        qCWarning(dcNetworkManager()) << "WirelessNetworkDevice: Invalid access point dbus interface";
+        qCWarning(dcNetworkManager()) << this << "Invalid access point dbus interface";
         return;
     }
 
     if (m_accessPointsTable.keys().contains(objectPath)) {
-        qCWarning(dcNetworkManager()) << "WirelessNetworkDevice: Access point already added" << objectPath.path();
+        qCWarning(dcNetworkManager()) << this << "Access point already added" << objectPath.path();
         return;
     }
 
     WirelessAccessPoint *accessPoint = new WirelessAccessPoint(objectPath, this);
-    //qCDebug(dcNetworkManager()) << "WirelessNetworkDevice: [+]" << accessPoint;
+    qCDebug(dcNetworkManager()) << interface() << "[+]" << accessPoint;
     m_accessPointsTable.insert(objectPath, accessPoint);
 }
 
@@ -229,7 +235,7 @@ void WirelessNetworkDevice::accessPointRemoved(const QDBusObjectPath &objectPath
     if (accessPoint == m_activeAccessPoint)
         m_activeAccessPoint = nullptr;
 
-    //qCDebug(dcNetworkManager()) << "WirelessNetworkDevice: [-]" << accessPoint;
+    qCDebug(dcNetworkManager()) << interface() << "[-]" << accessPoint;
     accessPoint->deleteLater();
 }
 
@@ -246,6 +252,11 @@ void WirelessNetworkDevice::propertiesChanged(const QVariantMap &properties)
     if (properties.contains("Mode"))
         setMode(static_cast<Mode>(m_wirelessInterface->property("Mode").toUInt()));
 
+    // Note: available since 1.12 (-1 means never scanned)
+    if (properties.contains("LastScan"))
+        setLastScan(m_wirelessInterface->property("LastScan").toInt());
+
+
 }
 
 /*! Writes the given \a device to the given to \a debug. \sa WirelessNetworkDevice, */
@@ -256,5 +267,5 @@ QDebug operator<<(QDebug debug, WirelessNetworkDevice *device)
     debug.nospace() << device->mode() <<  ", ";
     debug.nospace() << device->bitRate() <<  " [Mb/s], ";
     debug.nospace() << device->deviceStateString() <<  ") ";
-    return debug;
+    return debug.space();
 }

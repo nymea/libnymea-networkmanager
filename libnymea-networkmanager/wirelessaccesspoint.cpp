@@ -41,6 +41,7 @@
     \value ApSecurityModeGroupCcmp
     \value ApSecurityModeKeyMgmtPsk
     \value ApSecurityModeKeyMgmt8021X
+    \value ApSecurityModeKeyMgmtSae
 */
 
 /*! \fn void WirelessAccessPoint::signalStrengthChanged();
@@ -66,8 +67,14 @@ WirelessAccessPoint::WirelessAccessPoint(const QDBusObjectPath &objectPath, QObj
     setMacAddress(accessPointInterface.property("HwAddress").toString());
     setFrequency(accessPointInterface.property("Frequency").toDouble() / 1000);
     setSignalStrength(accessPointInterface.property("Strength").toInt());
-    setSecurityFlags(WirelessAccessPoint::ApSecurityModes(accessPointInterface.property("WpaFlags").toUInt()));
-    setIsProtected(static_cast<bool>(accessPointInterface.property("Flags").toUInt()));
+    m_capabilities = static_cast<WirelessAccessPoint::ApFlags>(accessPointInterface.property("Flags").toUInt());
+    setWpaFlags(WirelessAccessPoint::ApSecurityModes(accessPointInterface.property("WpaFlags").toUInt()));
+    setRsnFlags(WirelessAccessPoint::ApSecurityModes(accessPointInterface.property("RsnFlags").toUInt()));
+    setIsProtected(m_rsnFlags != 0);
+
+    qCDebug(dcNetworkManager()) << ssid() << "WPA flags:" << m_wpaFlags;
+    qCDebug(dcNetworkManager()) << ssid() << "RSN flags:" << m_rsnFlags;
+    qCDebug(dcNetworkManager()) << ssid() << "Capabilities:" << m_capabilities;
 
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), objectPath.path(), NetworkManagerUtils::accessPointInterfaceString(), "PropertiesChanged", this, SLOT(onPropertiesChanged(QVariantMap)));
 }
@@ -123,6 +130,16 @@ void WirelessAccessPoint::setSignalStrength(int signalStrength)
     emit signalStrengthChanged();
 }
 
+void WirelessAccessPoint::setWpaFlags(WirelessAccessPoint::ApSecurityModes wpaFlags)
+{
+    m_wpaFlags = wpaFlags;
+}
+
+void WirelessAccessPoint::setRsnFlags(WirelessAccessPoint::ApSecurityModes rsnFlags)
+{
+    m_rsnFlags = rsnFlags;
+}
+
 void WirelessAccessPoint::setIsProtected(bool isProtected)
 {
     m_isProtected = isProtected;
@@ -134,18 +151,31 @@ bool WirelessAccessPoint::isProtected() const
     return m_isProtected;
 }
 
-/*! Returns the security flags of this \l{WirelessAccessPoint}.
+WirelessAccessPoint::ApFlags WirelessAccessPoint::capabilities() const
+{
+    return m_capabilities;
+}
+
+/*! Returns the WPA security flags of this \l{WirelessAccessPoint}.
+
+    This flags are describing the access point's capabilities according to WPA (Wifi Protected Access).
 
     \sa WirelessAccessPoint::ApSecurityModes
 */
-WirelessAccessPoint::ApSecurityModes WirelessAccessPoint::securityFlags() const
+WirelessAccessPoint::ApSecurityModes WirelessAccessPoint::wpaFlags() const
 {
-    return m_securityFlags;
+    return m_wpaFlags;
 }
 
-void WirelessAccessPoint::setSecurityFlags(WirelessAccessPoint::ApSecurityModes securityFlags)
+/*! Returns the RSN security flags of this \l{WirelessAccessPoint}.
+
+    Flags describing the access point's capabilities according to the RSN (Robust Secure Network) protocol.
+
+    \sa WirelessAccessPoint::ApSecurityModes
+*/
+WirelessAccessPoint::ApSecurityModes WirelessAccessPoint::rsnFlags() const
 {
-    m_securityFlags = securityFlags;
+    return m_rsnFlags;
 }
 
 void WirelessAccessPoint::onPropertiesChanged(const QVariantMap &properties)
@@ -157,5 +187,10 @@ void WirelessAccessPoint::onPropertiesChanged(const QVariantMap &properties)
 
 QDebug operator<<(QDebug debug, WirelessAccessPoint *accessPoint)
 {
-    return debug.nospace() << "AccessPoint(" << accessPoint->signalStrength() << "%, " <<  accessPoint->frequency()<< " GHz, " << accessPoint->ssid() << ", " << (accessPoint->isProtected() ? "protected" : "open" ) << ")";
+    debug.nospace() << "AccessPoint(" << accessPoint->signalStrength() << "%, "
+                           <<  accessPoint->frequency()<< " GHz, "
+                            << accessPoint->ssid() << ", " <<
+                               (accessPoint->isProtected() ? "protected" : "open" )
+                            << ")";
+    return debug.space();
 }
