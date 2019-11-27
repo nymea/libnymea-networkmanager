@@ -1,3 +1,11 @@
+libnymea-networkmanager (0.2.1) xenial; urgency=medium
+
+  [ Simon Stürz ]
+  * Set wireless accesspoint to WPA2 and set reconnect forever
+  * Fix wireless protected flag and add open network connection support
+
+ -- Jenkins <jenkins@nymea.io>  Wed, 27 Nov 2019 17:26:11 +0100
+
 libnymea-networkmanager (0.2.0) xenial; urgency=medium
   [ Simon Stürz ]
   * Update pkgconfig and include dir path
