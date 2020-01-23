@@ -74,6 +74,7 @@ QList<NetworkConnection *> NetworkSettings::connections() const
 
 void NetworkSettings::loadConnections()
 {
+    qCDebug(dcNetworkManager()) << "Load connection list";
     QDBusMessage query = m_settingsInterface->call("ListConnections");
     if(query.type() != QDBusMessage::ReplyMessage) {
         qCWarning(dcNetworkManager()) << query.errorName() << query.errorMessage();
