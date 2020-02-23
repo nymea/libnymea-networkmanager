@@ -43,6 +43,7 @@
 
 #include <QUuid>
 #include <QDebug>
+#include <QTimer>
 #include <QMetaEnum>
 
 /*! Constructs a new \l{NetworkManager} object with the given \a parent. */
@@ -289,8 +290,6 @@ NetworkManager::NetworkManagerError NetworkManager::startAccessPoint(const QStri
 
     qCDebug(dcNetworkManager()) << "Connection added" << connectionObjectPath.path();
 
-    //
-
     // Activate connection
     QDBusMessage query = m_networkManagerInterface->call("ActivateConnection",
                                                          QVariant::fromValue(connectionObjectPath),
@@ -368,30 +367,42 @@ bool NetworkManager::init()
     m_networkManagerInterface = new QDBusInterface(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), QDBusConnection::systemBus(), this);
     if(!m_networkManagerInterface->isValid()) {
         qCWarning(dcNetworkManager()) << "Invalid DBus network manager interface. NetworkManagre not available.";
-        m_networkManagerInterface->deleteLater();
+        delete m_networkManagerInterface;
         m_networkManagerInterface = nullptr;
         setAvailable(false);
         return false;
     }
 
+    qCDebug(dcNetworkManager()) << "DBus interface created successfully" << NetworkManagerUtils::networkManagerPathString();
+
     // Init properties
+    qCDebug(dcNetworkManager()) << "Read initial properties...";
     setVersion(m_networkManagerInterface->property("Version").toString());
     setState(static_cast<NetworkManagerState>(m_networkManagerInterface->property("State").toUInt()));
     setConnectivityState(static_cast<NetworkManagerConnectivityState>(m_networkManagerInterface->property("Connectivity").toUInt()));
     setNetworkingEnabled(m_networkManagerInterface->property("NetworkingEnabled").toBool());
     setWirelessEnabled(m_networkManagerInterface->property("WirelessEnabled").toBool());
 
-    // Load network devices
-    loadDevices();
-
-    // Create settings
-    m_networkSettings = new NetworkSettings(this);
+    if (m_version.isEmpty()) {
+        qCWarning(dcNetworkManager()) << "Could not read initial properties. The networkmanager might not be initialized yet. Reinitialize in 2 seconds...";
+        delete m_networkManagerInterface;
+        m_networkManagerInterface = nullptr;
+        setAvailable(false);
+        QTimer::singleShot(2000, this, &NetworkManager::init);
+        return false;
+    }
 
     // Connect signals
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "StateChanged", this, SLOT(onStateChanged(uint)));
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "DeviceAdded", this, SLOT(onDeviceAdded(QDBusObjectPath)));
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "DeviceRemoved", this, SLOT(onDeviceRemoved(QDBusObjectPath)));
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "PropertiesChanged", this, SLOT(onPropertiesChanged(QVariantMap)));
+
+    // Load network devices
+    loadDevices();
+
+    // Create settings
+    m_networkSettings = new NetworkSettings(this);
 
     setAvailable(true);
     qCDebug(dcNetworkManager()) << "Network manager initialized successfully.";
@@ -435,6 +446,7 @@ void NetworkManager::deinit()
 void NetworkManager::loadDevices()
 {
     // Get network devices
+    qCDebug(dcNetworkManager()) << "Get available devices";
     QDBusMessage query = m_networkManagerInterface->call("GetDevices");
     if(query.type() != QDBusMessage::ReplyMessage) {
         qCWarning(dcNetworkManager()) << query.errorName() << query.errorMessage();
