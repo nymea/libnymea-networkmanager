@@ -1,6 +1,8 @@
-libnymea-networkmanager (0.3.0) UNRELEASED; urgency=medium
+libnymea-networkmanager (0.3.0) xenial; urgency=medium
+  [ Michael Zanetti ]
+  * Remove misleading return value, now that the method is async
 
- -- Michael Zanetti <michael.zanetti@guh.io>  Sat, 21 Mar 2020 00:48:06 +0100
+ -- Jenkins <jenkins@nymea.io>  Tue, 24 Mar 2020 13:21:07 +0100
 
 libnymea-networkmanager (0.2.3) xenial; urgency=medium
 
