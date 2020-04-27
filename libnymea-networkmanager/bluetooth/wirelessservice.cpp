@@ -385,7 +385,15 @@ void WirelessService::commandGetCurrentConnection(const QVariantMap &request)
         connectionDataMap.insert("p", 0);
         connectionDataMap.insert("i", "");
     } else {
-        QHostAddress address = wifiInterface.addressEntries().first().ip();
+        QHostAddress address;
+        // Note: for now, we'll just use the first IPv4 address. However, in a future version
+        // this should somehow pack all addresses, IPv4 and IPv6 ones.
+        foreach (const QNetworkAddressEntry &entry, wifiInterface.addressEntries()) {
+            if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
+                address = entry.ip();
+                break;
+            }
+        }
         qCDebug(dcNetworkManagerBluetoothServer()) << "Current connection:" << m_device->activeAccessPoint() << address.toString();
         connectionDataMap.insert("e", m_device->activeAccessPoint()->ssid());
         connectionDataMap.insert("m", m_device->activeAccessPoint()->macAddress());
