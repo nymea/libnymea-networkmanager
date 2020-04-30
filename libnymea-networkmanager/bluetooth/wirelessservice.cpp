@@ -419,14 +419,41 @@ void WirelessService::commandStartAccessPoint(const QVariantMap &request)
     }
 
     QVariantMap parameters = request.value("p").toMap();
-    if (!parameters.contains("e") || !parameters.contains("p")) {
-        qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Start access point command: Invalid parameters.";
+    if (!parameters.contains("e")) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Missing ESSID (e) parameter.";
         streamData(createResponse(WirelessServiceCommandStartAccessPoint, WirelessServiceResponseIvalidParameters));
         return;
     }
 
-    m_networkManager->startAccessPoint(m_device->interface(), parameters.value("e").toString(), parameters.value("p").toString());
-    streamData(createResponse(WirelessServiceCommandStartAccessPoint));
+    QString essid = parameters.value("e").toString();
+    if (essid.length() > 32) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Invalid ESSID (e) parameter.";
+        streamData(createResponse(WirelessServiceCommandStartAccessPoint, WirelessServiceResponseIvalidParameters));
+        return;
+    }
+
+    if (!parameters.contains("p")) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Missing passkey (p) parameter.";
+        streamData(createResponse(WirelessServiceCommandStartAccessPoint, WirelessServiceResponseIvalidParameters));
+        return;
+    }
+
+    QString passkey = parameters.value("p").toString();
+    if (passkey.length() < 8 || passkey.length() > 64) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Invalid passkey (p) parameter.";
+        streamData(createResponse(WirelessServiceCommandStartAccessPoint, WirelessServiceResponseIvalidParameters));
+        return;
+    }
+
+    NetworkManager::NetworkManagerError status = m_networkManager->startAccessPoint(m_device->interface(), essid, passkey);
+    if (status != NetworkManager::NetworkManagerErrorNoError) {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "Failed to start the access point:" << status;
+        // FIXME: Add more error codes so that we can actually report this failure to the client
+        streamData(createResponse(WirelessServiceCommandStartAccessPoint, WirelessServiceResponseUnknownError));
+        return;
+    }
+
+    streamData(createResponse(WirelessServiceCommandStartAccessPoint, WirelessServiceResponseSuccess));
 }
 
 void WirelessService::characteristicChanged(const QLowEnergyCharacteristic &characteristic, const QByteArray &value)
