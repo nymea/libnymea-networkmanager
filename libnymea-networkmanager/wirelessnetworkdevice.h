@@ -46,20 +46,20 @@ class WirelessNetworkDevice : public NetworkDevice
 {
     Q_OBJECT
 public:
-    enum Mode {
-        ModeUnknown          = 0,
-        ModeAdhoc            = 1,
-        ModeInfrastructure   = 2,
-        ModeAccessPoint      = 3
+    enum WirelessMode {
+        WirelessModeUnknown          = 0,
+        WirelessModeAdhoc            = 1,
+        WirelessModeInfrastructure   = 2,
+        WirelessModeAccessPoint      = 3
     };
-    Q_ENUM(Mode)
+    Q_ENUM(WirelessMode)
 
     explicit WirelessNetworkDevice(const QDBusObjectPath &objectPath, QObject *parent = nullptr);
 
     // Properties
     QString macAddress() const;
     int bitRate() const;
-    Mode mode() const;
+    WirelessMode wirelessMode() const;
     WirelessAccessPoint *activeAccessPoint();
 
     // Accesspoints
@@ -70,13 +70,23 @@ public:
     // Methods
     void scanWirelessNetworks();
 
+signals:
+    void bitRateChanged(int bitRate);
+    void wirelessModeChanged(WirelessMode mode);
+    void lastScanChanged(int lastScan);
+
+private slots:
+    void accessPointAdded(const QDBusObjectPath &objectPath);
+    void accessPointRemoved(const QDBusObjectPath &objectPath);
+    void propertiesChanged(const QVariantMap &properties);
+
 private:
     QDBusInterface *m_wirelessInterface = nullptr;
     WirelessAccessPoint *m_activeAccessPoint = nullptr;
 
     int m_bitRate;
     QString m_macAddress;
-    Mode m_mode = ModeUnknown;
+    WirelessMode m_wirelessMode = WirelessModeUnknown;
     int m_lastScan = -1;
     QDBusObjectPath m_activeAccessPointObjectPath;
 
@@ -84,21 +94,7 @@ private:
 
     void readAccessPoints();
 
-    void setMacAddress(const QString &macAddress);
-    void setMode(Mode mode);
-    void setBitrate(int bitRate);
-    void setLastScan(int lastScan);
     void setActiveAccessPoint(const QDBusObjectPath &activeAccessPointObjectPath);
-
-private slots:
-    void accessPointAdded(const QDBusObjectPath &objectPath);
-    void accessPointRemoved(const QDBusObjectPath &objectPath);
-    void propertiesChanged(const QVariantMap &properties);
-
-signals:
-    void bitRateChanged(int bitRate);
-    void modeChanged(Mode mode);
-
 };
 
 QDebug operator<<(QDebug debug, WirelessNetworkDevice *device);

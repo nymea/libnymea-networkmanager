@@ -68,7 +68,7 @@ WirelessService::WirelessService(QLowEnergyService *service, NetworkManager *net
     m_device = m_networkManager->wirelessNetworkDevices().first();
     connect(m_device, &WirelessNetworkDevice::bitRateChanged, this, &WirelessService::onWirelessDeviceBitRateChanged);
     connect(m_device, &WirelessNetworkDevice::stateChanged, this, &WirelessService::onWirelessDeviceStateChanged);
-    connect(m_device, &WirelessNetworkDevice::modeChanged, this, &WirelessService::onWirelessModeChanged);
+    connect(m_device, &WirelessNetworkDevice::wirelessModeChanged, this, &WirelessService::onWirelessModeChanged);
 }
 
 QLowEnergyService *WirelessService::service()
@@ -119,9 +119,9 @@ QLowEnergyServiceData WirelessService::serviceData(NetworkManager *networkManage
     wirelessModeCharacteristicData.addDescriptor(clientConfigDescriptorData);
     wirelessModeCharacteristicData.setValueLength(1, 1);
     if (networkManager->wirelessNetworkDevices().isEmpty()) {
-        wirelessModeCharacteristicData.setValue(WirelessService::getWirelessMode(WirelessNetworkDevice::ModeUnknown));
+        wirelessModeCharacteristicData.setValue(WirelessService::getWirelessMode(WirelessNetworkDevice::WirelessModeUnknown));
     } else {
-        wirelessModeCharacteristicData.setValue(WirelessService::getWirelessMode(networkManager->wirelessNetworkDevices().first()->mode()));
+        wirelessModeCharacteristicData.setValue(WirelessService::getWirelessMode(networkManager->wirelessNetworkDevices().first()->wirelessMode()));
     }
     serviceData.addCharacteristic(wirelessModeCharacteristicData);
 
@@ -190,16 +190,16 @@ QByteArray WirelessService::getWirelessNetworkDeviceState(const NetworkDevice::N
     return QByteArray::fromHex("00");
 }
 
-QByteArray WirelessService::getWirelessMode(WirelessNetworkDevice::Mode mode)
+QByteArray WirelessService::getWirelessMode(WirelessNetworkDevice::WirelessMode mode)
 {
     switch (mode) {
-    case WirelessNetworkDevice::ModeUnknown:
+    case WirelessNetworkDevice::WirelessModeUnknown:
         return QByteArray::fromHex("00");
-    case WirelessNetworkDevice::ModeAdhoc:
+    case WirelessNetworkDevice::WirelessModeAdhoc:
         return QByteArray::fromHex("01");
-    case WirelessNetworkDevice::ModeInfrastructure:
+    case WirelessNetworkDevice::WirelessModeInfrastructure:
         return QByteArray::fromHex("02");
-    case WirelessNetworkDevice::ModeAccessPoint:
+    case WirelessNetworkDevice::WirelessModeAccessPoint:
         return QByteArray::fromHex("03");
     }
 
@@ -605,7 +605,7 @@ void WirelessService::onWirelessDeviceStateChanged(const NetworkDevice::NetworkD
     m_service->writeCharacteristic(characteristic, WirelessService::getWirelessNetworkDeviceState(state));
 }
 
-void WirelessService::onWirelessModeChanged(WirelessNetworkDevice::Mode mode)
+void WirelessService::onWirelessModeChanged(WirelessNetworkDevice::WirelessMode mode)
 {
     if (!m_service) {
         qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Could not update wireless device mode. Service not valid";
