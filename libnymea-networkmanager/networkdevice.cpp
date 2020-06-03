@@ -372,7 +372,6 @@ void NetworkDevice::onStateChanged(uint newState, uint oldState, uint reason)
     if (m_deviceState != NetworkDeviceState(newState)) {
         m_ipv4Addresses = readIpAddresses("Ip4Config", "org.freedesktop.NetworkManager.IP4Config");
         m_ipv6Addresses = readIpAddresses("Ip6Config", "org.freedesktop.NetworkManager.IP6Config");
-        qCDebug(dcNetworkManager()) << "Fooooooooooooo" << m_ipv4Addresses << m_ipv6Addresses;
         emit deviceChanged();
 
         m_deviceState = NetworkDeviceState(newState);
