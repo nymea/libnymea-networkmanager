@@ -170,6 +170,8 @@ NetworkDevice::NetworkDevice(const QDBusObjectPath &objectPath, QObject *parent)
         return;
     }
 
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), m_objectPath.path(), NetworkManagerUtils::deviceInterfaceString(), "StateChanged", this, SLOT(onStateChanged(uint,uint,uint)));
+
     m_udi = m_networkDeviceInterface->property("Udi").toString();
     m_interface = m_networkDeviceInterface->property("Interface").toString();
     m_ipInterface = m_networkDeviceInterface->property("IpInterface").toString();
@@ -185,10 +187,8 @@ NetworkDevice::NetworkDevice(const QDBusObjectPath &objectPath, QObject *parent)
     m_deviceType = NetworkDeviceType(m_networkDeviceInterface->property("DeviceType").toUInt());
 
     m_activeConnection = qdbus_cast<QDBusObjectPath>(m_networkDeviceInterface->property("ActiveConnection"));
-    m_ip4Config = qdbus_cast<QDBusObjectPath>(m_networkDeviceInterface->property("Ip4Config"));
-    m_ip6Config = qdbus_cast<QDBusObjectPath>(m_networkDeviceInterface->property("Ip6Config"));
-
-    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), m_objectPath.path(), NetworkManagerUtils::deviceInterfaceString(), "StateChanged", this, SLOT(onStateChanged(uint,uint,uint)));
+    m_ipv4Addresses = readIpAddresses("Ip4Config", "org.freedesktop.NetworkManager.IP4Config");
+    m_ipv6Addresses = readIpAddresses("Ip6Config", "org.freedesktop.NetworkManager.IP6Config");
 }
 
 /*! Returns the dbus object path of this \l{NetworkDevice}. */
@@ -257,6 +257,18 @@ bool NetworkDevice::autoconnect() const
     return m_autoconnect;
 }
 
+/*! Returns IPv4 addresses for this \l{NetworkDevice}. */
+QStringList NetworkDevice::ipv4Addresses() const
+{
+    return m_ipv4Addresses;
+}
+
+/*! Returns IPv4 addresses for this \l{NetworkDevice}. */
+QStringList NetworkDevice::ipv6Addresses() const
+{
+    return m_ipv6Addresses;
+}
+
 /*! Returns the device state of this \l{NetworkDevice}. \sa NetworkDeviceState, */
 NetworkDevice::NetworkDeviceState NetworkDevice::deviceState() const
 {
@@ -285,12 +297,6 @@ NetworkDevice::NetworkDeviceType NetworkDevice::deviceType() const
 QDBusObjectPath NetworkDevice::activeConnection() const
 {
     return m_activeConnection;
-}
-
-/*! Returns the dbus object path from the IPv4 configuration of this \l{NetworkDevice}. */
-QDBusObjectPath NetworkDevice::ip4Config() const
-{
-    return m_ip4Config;
 }
 
 /*! Returns the list of dbus object paths for the currently available connection of this \l{NetworkDevice}. */
@@ -335,15 +341,43 @@ QString NetworkDevice::deviceStateReasonToString(const NetworkDevice::NetworkDev
     return QString(metaEnum.valueToKey(deviceStateReason));
 }
 
+QStringList NetworkDevice::readIpAddresses(const QString &property, const QString &interface)
+{
+    QStringList ret;
+    QDBusObjectPath configPath = qdbus_cast<QDBusObjectPath>(m_networkDeviceInterface->property(property.toUtf8()));
+
+    if (configPath.path() != "/") {
+        QDBusInterface iface(NetworkManagerUtils::networkManagerServiceString(), configPath.path(), "org.freedesktop.DBus.Properties", QDBusConnection::systemBus());
+
+        QDBusMessage reply = iface.call("Get", interface, "AddressData");
+        QVariant v = reply.arguments().first();
+        QDBusArgument arg = v.value<QDBusVariant>().variant().value<QDBusArgument>();
+
+        arg.beginArray();
+        while(!arg.atEnd()) {
+            QVariantMap m;
+            arg >> m;
+            ret.append(m.value("address").toString());
+        }
+    }
+    return ret;
+}
+
 void NetworkDevice::onStateChanged(uint newState, uint oldState, uint reason)
 {
     Q_UNUSED(oldState)
     qCDebug(dcNetworkManager()) << m_interface << "--> State changed:" << deviceStateToString(NetworkDeviceState(newState)) << ":" << deviceStateReasonToString(NetworkDeviceStateReason(reason));
+
+
     if (m_deviceState != NetworkDeviceState(newState)) {
-        m_deviceState = NetworkDeviceState(newState);
+        m_ipv4Addresses = readIpAddresses("Ip4Config", "org.freedesktop.NetworkManager.IP4Config");
+        m_ipv6Addresses = readIpAddresses("Ip6Config", "org.freedesktop.NetworkManager.IP6Config");
         emit deviceChanged();
+
+        m_deviceState = NetworkDeviceState(newState);
         emit stateChanged(m_deviceState);
     }
+
 }
 
 QDebug operator<<(QDebug debug, NetworkDevice *device)

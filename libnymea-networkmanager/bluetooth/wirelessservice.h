@@ -86,7 +86,7 @@ private:
 
     // Note: static to be available in serviceData
     static QByteArray getWirelessNetworkDeviceState(const NetworkDevice::NetworkDeviceState &state);
-    static QByteArray getWirelessMode(WirelessNetworkDevice::Mode mode);
+    static QByteArray getWirelessMode(WirelessNetworkDevice::WirelessMode mode);
 
     void streamData(const QVariantMap &responseMap);
 
@@ -116,7 +116,7 @@ private slots:
     // Wireless network device
     void onWirelessDeviceBitRateChanged(const int &bitRate);
     void onWirelessDeviceStateChanged(const NetworkDevice::NetworkDeviceState &state);
-    void onWirelessModeChanged(WirelessNetworkDevice::Mode mode);
+    void onWirelessModeChanged(WirelessNetworkDevice::WirelessMode mode);
 
 };
 

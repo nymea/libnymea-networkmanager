@@ -86,9 +86,9 @@ WirelessNetworkDevice::WirelessNetworkDevice(const QDBusObjectPath &objectPath, 
 
     readAccessPoints();
 
-    setMacAddress(m_wirelessInterface->property("HwAddress").toString());
-    setMode(static_cast<Mode>(m_wirelessInterface->property("Mode").toUInt()));
-    setBitrate(m_wirelessInterface->property("Bitrate").toInt());
+    m_macAddress = m_wirelessInterface->property("HwAddress").toString();
+    m_wirelessMode = static_cast<WirelessMode>(m_wirelessInterface->property("Mode").toUInt());
+    m_bitRate = m_wirelessInterface->property("Bitrate").toInt() / 1000;
     setActiveAccessPoint(qdbus_cast<QDBusObjectPath>(m_wirelessInterface->property("ActiveAccessPoint")));
 }
 
@@ -104,9 +104,9 @@ int WirelessNetworkDevice::bitRate() const
     return m_bitRate;
 }
 
-WirelessNetworkDevice::Mode WirelessNetworkDevice::mode() const
+WirelessNetworkDevice::WirelessMode WirelessNetworkDevice::wirelessMode() const
 {
-    return m_mode;
+    return m_wirelessMode;
 }
 
 /*! Returns the current active \l{WirelessAccessPoint} of this \l{WirelessNetworkDevice}. */
@@ -169,34 +169,6 @@ void WirelessNetworkDevice::readAccessPoints()
     argument.endArray();
 }
 
-void WirelessNetworkDevice::setMacAddress(const QString &macAddress)
-{
-    m_macAddress = macAddress;
-}
-
-void WirelessNetworkDevice::setMode(WirelessNetworkDevice::Mode mode)
-{
-    if (m_mode == mode)
-        return;
-
-    m_mode = mode;
-    emit modeChanged(m_mode);
-}
-
-void WirelessNetworkDevice::setBitrate(int bitRate)
-{
-    if (m_bitRate != bitRate / 1000) {
-        m_bitRate = bitRate / 1000;
-        emit bitRateChanged(m_bitRate);
-        emit deviceChanged();
-    }
-}
-
-void WirelessNetworkDevice::setLastScan(int lastScan)
-{
-    m_lastScan = lastScan;
-}
-
 void WirelessNetworkDevice::setActiveAccessPoint(const QDBusObjectPath &activeAccessPointObjectPath)
 {
     if (m_activeAccessPointObjectPath != activeAccessPointObjectPath) {
@@ -251,20 +223,27 @@ void WirelessNetworkDevice::propertiesChanged(const QVariantMap &properties)
 {
     //qCDebug(dcNetworkManager()) << "WirelessNetworkDevice: Property changed" << properties;
 
-    if (properties.contains("Bitrate"))
-        setBitrate(properties.value("Bitrate").toInt());
+    if (properties.contains("Bitrate")) {
+        m_bitRate = properties.value("Bitrate").toInt() / 1000;
+        emit bitRateChanged(m_bitRate);
+    }
 
-    if (properties.contains("ActiveAccessPoint"))
-        setActiveAccessPoint(qdbus_cast<QDBusObjectPath>(properties.value("ActiveAccessPoint")));
-
-    if (properties.contains("Mode"))
-        setMode(static_cast<Mode>(m_wirelessInterface->property("Mode").toUInt()));
+    if (properties.contains("Mode")) {
+        m_wirelessMode = static_cast<WirelessMode>(m_wirelessInterface->property("Mode").toUInt());
+        emit wirelessModeChanged(m_wirelessMode);
+    }
 
     // Note: available since 1.12 (-1 means never scanned)
-    if (properties.contains("LastScan"))
-        setLastScan(m_wirelessInterface->property("LastScan").toInt());
+    if (properties.contains("LastScan")) {
+        m_lastScan = m_wirelessInterface->property("LastScan").toInt();
+        emit lastScanChanged(m_lastScan);
+    }
 
+    if (properties.contains("ActiveAccessPoint")) {
+        setActiveAccessPoint(qdbus_cast<QDBusObjectPath>(properties.value("ActiveAccessPoint")));
+    }
 
+    emit deviceChanged();
 }
 
 /*! Writes the given \a device to the given to \a debug. \sa WirelessNetworkDevice, */
@@ -272,7 +251,7 @@ QDebug operator<<(QDebug debug, WirelessNetworkDevice *device)
 {
     debug.nospace() << "WirelessNetworkDevice(" << device->interface() << ", ";
     debug.nospace() << device->macAddress() <<  ", ";
-    debug.nospace() << device->mode() <<  ", ";
+    debug.nospace() << device->wirelessMode() <<  ", ";
     debug.nospace() << device->bitRate() <<  " [Mb/s], ";
     debug.nospace() << device->deviceStateString() <<  ") ";
     return debug.space();

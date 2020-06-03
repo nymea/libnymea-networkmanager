@@ -355,7 +355,7 @@ void NetworkManager::init()
     qCDebug(dcNetworkManager()) << "Initializing network manager";
     // Check DBus connection
     if (!QDBusConnection::systemBus().isConnected()) {
-        qCWarning(dcNetworkManager()) << "System DBus not connected. NetworkManagre not available.";
+        qCWarning(dcNetworkManager()) << "System DBus not connected. NetworkManager not available.";
         setAvailable(false);
         return;
     }

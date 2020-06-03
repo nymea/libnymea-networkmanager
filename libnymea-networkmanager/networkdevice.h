@@ -170,6 +170,8 @@ public:
     uint mtu() const;
     uint metered() const;
     bool autoconnect() const;
+    QStringList ipv4Addresses() const;
+    QStringList ipv6Addresses() const;
 
     NetworkDeviceState deviceState() const;
     QString deviceStateString() const;
@@ -200,6 +202,8 @@ private:
     QString m_driverVersion;
     QString m_firmwareVersion;
     QString m_physicalPortId;
+    QList<QString> m_ipv4Addresses;
+    QList<QString> m_ipv6Addresses;
     uint m_mtu = 0;
     uint m_metered = 0;
     bool m_autoconnect = false;
@@ -208,10 +212,11 @@ private:
     NetworkDeviceType m_deviceType = NetworkDeviceTypeUnknown;
 
     QDBusObjectPath m_activeConnection;
-    QDBusObjectPath m_ip4Config;
-    QDBusObjectPath m_ip6Config;
 
     QList<QDBusObjectPath> m_availableConnections;
+
+private:
+    QStringList readIpAddresses(const QString &property, const QString &interface);
 
 private slots:
     void onStateChanged(uint newState, uint oldState, uint reason);
