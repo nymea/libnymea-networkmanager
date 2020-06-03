@@ -1,7 +1,11 @@
-libnymea-networkmanager (0.4.0) UNRELEASED; urgency=medium
+libnymea-networkmanager (0.4.0) xenial; urgency=medium
 
+  [ Michael Zanetti ]
+  * Fix wrong argument when creating an access point
+  * Add IP address information
+  * Improve AP error handling a bit
 
- -- Michael Zanetti <michael.zanetti@guh.io>  Mon, 27 Apr 2020 10:24:32 +0200
+ -- Jenkins <jenkins@nymea.io>  Thu, 04 Jun 2020 00:49:11 +0200
 
 libnymea-networkmanager (0.3.0) xenial; urgency=medium
   [ Michael Zanetti ]
