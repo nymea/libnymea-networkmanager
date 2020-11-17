@@ -175,7 +175,7 @@ QLowEnergyServiceData BluetoothServer::deviceInformationServiceData()
     // Manufacturer name string 0x2a29
     QLowEnergyCharacteristicData manufacturerNameCharData;
     manufacturerNameCharData.setUuid(QBluetoothUuid::ManufacturerNameString);
-    manufacturerNameCharData.setValue(QString("guh GmbH").toUtf8());
+    manufacturerNameCharData.setValue(QString("nymea GmbH").toUtf8());
     manufacturerNameCharData.setProperties(QLowEnergyCharacteristic::Read);
     serviceData.addCharacteristic(manufacturerNameCharData);
 
