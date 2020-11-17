@@ -476,6 +476,10 @@ void BluetoothServer::start()
 
 void BluetoothServer::stop()
 {
+    // Prevent printing the stop message twice in case of different shutdown reasons
+    if (!m_controller && !m_localDevice)
+        return;
+
     qCDebug(dcNetworkManagerBluetoothServer()) << "-------------------------------------";
     qCDebug(dcNetworkManagerBluetoothServer()) << "Stopping bluetooth server.";
     qCDebug(dcNetworkManagerBluetoothServer()) << "-------------------------------------";
