@@ -1,3 +1,10 @@
+libnymea-networkmanager (0.4.1) xenial; urgency=medium
+
+  [ Simon Stürz ]
+  * Change bluetooth shutdown behavior
+
+ -- Jenkins <jenkins@nymea.io>  Tue, 17 Nov 2020 18:09:57 +0100
+
 libnymea-networkmanager (0.4.0) xenial; urgency=medium
 
   [ Michael Zanetti ]
