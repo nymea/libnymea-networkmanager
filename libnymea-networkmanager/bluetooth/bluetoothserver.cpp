@@ -242,7 +242,7 @@ void BluetoothServer::setRunning(bool running)
 {
     if (m_running == running)
         return;
-
+    qCDebug(dcNetworkManagerBluetoothServer()) << "Set running" << running;
     m_running = running;
     emit runningChanged(m_running);
 }
@@ -252,6 +252,7 @@ void BluetoothServer::setConnected(bool connected)
     if (m_connected == connected)
         return;
 
+    qCDebug(dcNetworkManagerBluetoothServer()) << "Set connected" << connected;
     m_connected = connected;
     emit connectedChanged(m_connected);
 }
@@ -301,6 +302,7 @@ void BluetoothServer::onDeviceConnected(const QBluetoothAddress &address)
 void BluetoothServer::onDeviceDisconnected(const QBluetoothAddress &address)
 {
     qCDebug(dcNetworkManagerBluetoothServer()) << "Device disconnected" << address.toString();
+    setConnected(false);
 }
 
 void BluetoothServer::onError(QLowEnergyController::Error error)
@@ -317,7 +319,6 @@ void BluetoothServer::onConnected()
 void BluetoothServer::onDisconnected()
 {
     qCDebug(dcNetworkManagerBluetoothServer()) << "Client disconnected";
-    setConnected(false);
     stop();
 }
 
@@ -326,7 +327,7 @@ void BluetoothServer::onControllerStateChanged(QLowEnergyController::ControllerS
     switch (state) {
     case QLowEnergyController::UnconnectedState:
         qCDebug(dcNetworkManagerBluetoothServer()) << "Controller state disonnected.";
-        setConnected(false);
+        setRunning(false);
         break;
     case QLowEnergyController::ConnectingState:
         qCDebug(dcNetworkManagerBluetoothServer()) << "Controller state connecting...";
@@ -493,6 +494,5 @@ void BluetoothServer::stop()
         m_localDevice = nullptr;
     }
 
-    setConnected(false);
-    setRunning(false);
+    // Let the events set the state connected and running
 }
