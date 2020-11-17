@@ -175,7 +175,7 @@ QLowEnergyServiceData BluetoothServer::deviceInformationServiceData()
     // Manufacturer name string 0x2a29
     QLowEnergyCharacteristicData manufacturerNameCharData;
     manufacturerNameCharData.setUuid(QBluetoothUuid::ManufacturerNameString);
-    manufacturerNameCharData.setValue(QString("guh GmbH").toUtf8());
+    manufacturerNameCharData.setValue(QString("nymea GmbH").toUtf8());
     manufacturerNameCharData.setProperties(QLowEnergyCharacteristic::Read);
     serviceData.addCharacteristic(manufacturerNameCharData);
 
@@ -242,7 +242,7 @@ void BluetoothServer::setRunning(bool running)
 {
     if (m_running == running)
         return;
-
+    qCDebug(dcNetworkManagerBluetoothServer()) << "Set running" << running;
     m_running = running;
     emit runningChanged(m_running);
 }
@@ -252,6 +252,7 @@ void BluetoothServer::setConnected(bool connected)
     if (m_connected == connected)
         return;
 
+    qCDebug(dcNetworkManagerBluetoothServer()) << "Set connected" << connected;
     m_connected = connected;
     emit connectedChanged(m_connected);
 }
@@ -301,6 +302,7 @@ void BluetoothServer::onDeviceConnected(const QBluetoothAddress &address)
 void BluetoothServer::onDeviceDisconnected(const QBluetoothAddress &address)
 {
     qCDebug(dcNetworkManagerBluetoothServer()) << "Device disconnected" << address.toString();
+    setConnected(false);
 }
 
 void BluetoothServer::onError(QLowEnergyController::Error error)
@@ -317,7 +319,6 @@ void BluetoothServer::onConnected()
 void BluetoothServer::onDisconnected()
 {
     qCDebug(dcNetworkManagerBluetoothServer()) << "Client disconnected";
-    setConnected(false);
     stop();
 }
 
@@ -326,7 +327,7 @@ void BluetoothServer::onControllerStateChanged(QLowEnergyController::ControllerS
     switch (state) {
     case QLowEnergyController::UnconnectedState:
         qCDebug(dcNetworkManagerBluetoothServer()) << "Controller state disonnected.";
-        setConnected(false);
+        setRunning(false);
         break;
     case QLowEnergyController::ConnectingState:
         qCDebug(dcNetworkManagerBluetoothServer()) << "Controller state connecting...";
@@ -462,7 +463,7 @@ void BluetoothServer::start()
     advertisingData.setDiscoverability(QLowEnergyAdvertisingData::DiscoverabilityGeneral);
     advertisingData.setIncludePowerLevel(true);
     advertisingData.setLocalName(m_advertiseName);
-    // FIXME: set guh manufacturer SIG data once available
+    // FIXME: set manufacturer SIG data once available
 
     // Note: start advertising in 100 ms interval, this makes the device better discoverable on certain phones
     QLowEnergyAdvertisingParameters advertisingParameters;
@@ -475,24 +476,27 @@ void BluetoothServer::start()
 
 void BluetoothServer::stop()
 {
+    // Prevent printing the stop message twice in case of different shutdown reasons
+    if (!m_controller && !m_localDevice)
+        return;
+
     qCDebug(dcNetworkManagerBluetoothServer()) << "-------------------------------------";
     qCDebug(dcNetworkManagerBluetoothServer()) << "Stopping bluetooth server.";
     qCDebug(dcNetworkManagerBluetoothServer()) << "-------------------------------------";
 
-    if (m_localDevice) {
-        qCDebug(dcNetworkManagerBluetoothServer()) << "Set host mode to connectable.";
-        m_localDevice->setHostMode(QBluetoothLocalDevice::HostConnectable);
-        delete m_localDevice;
-        m_localDevice = nullptr;
-    }
-
     if (m_controller) {
         qCDebug(dcNetworkManagerBluetoothServer()) << "Stop advertising.";
         m_controller->stopAdvertising();
-        delete m_controller;
+        m_controller->deleteLater();
         m_controller = nullptr;
     }
 
-    setConnected(false);
-    setRunning(false);
+    if (m_localDevice) {
+        qCDebug(dcNetworkManagerBluetoothServer()) << "Set host mode to connectable.";
+        m_localDevice->setHostMode(QBluetoothLocalDevice::HostConnectable);
+        m_localDevice->deleteLater();
+        m_localDevice = nullptr;
+    }
+
+    // Let the events set the state connected and running
 }
