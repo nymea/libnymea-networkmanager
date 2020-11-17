@@ -462,7 +462,7 @@ void BluetoothServer::start()
     advertisingData.setDiscoverability(QLowEnergyAdvertisingData::DiscoverabilityGeneral);
     advertisingData.setIncludePowerLevel(true);
     advertisingData.setLocalName(m_advertiseName);
-    // FIXME: set guh manufacturer SIG data once available
+    // FIXME: set manufacturer SIG data once available
 
     // Note: start advertising in 100 ms interval, this makes the device better discoverable on certain phones
     QLowEnergyAdvertisingParameters advertisingParameters;
@@ -479,18 +479,18 @@ void BluetoothServer::stop()
     qCDebug(dcNetworkManagerBluetoothServer()) << "Stopping bluetooth server.";
     qCDebug(dcNetworkManagerBluetoothServer()) << "-------------------------------------";
 
-    if (m_localDevice) {
-        qCDebug(dcNetworkManagerBluetoothServer()) << "Set host mode to connectable.";
-        m_localDevice->setHostMode(QBluetoothLocalDevice::HostConnectable);
-        delete m_localDevice;
-        m_localDevice = nullptr;
-    }
-
     if (m_controller) {
         qCDebug(dcNetworkManagerBluetoothServer()) << "Stop advertising.";
         m_controller->stopAdvertising();
-        delete m_controller;
+        m_controller->deleteLater();
         m_controller = nullptr;
+    }
+
+    if (m_localDevice) {
+        qCDebug(dcNetworkManagerBluetoothServer()) << "Set host mode to connectable.";
+        m_localDevice->setHostMode(QBluetoothLocalDevice::HostConnectable);
+        m_localDevice->deleteLater();
+        m_localDevice = nullptr;
     }
 
     setConnected(false);
