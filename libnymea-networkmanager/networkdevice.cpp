@@ -350,6 +350,9 @@ QStringList NetworkDevice::readIpAddresses(const QString &property, const QStrin
         QDBusInterface iface(NetworkManagerUtils::networkManagerServiceString(), configPath.path(), "org.freedesktop.DBus.Properties", QDBusConnection::systemBus());
 
         QDBusMessage reply = iface.call("Get", interface, "AddressData");
+        if (reply.arguments().isEmpty()) {
+            return ret;
+        }
         QVariant v = reply.arguments().first();
         QDBusArgument arg = v.value<QDBusVariant>().variant().value<QDBusArgument>();
 
