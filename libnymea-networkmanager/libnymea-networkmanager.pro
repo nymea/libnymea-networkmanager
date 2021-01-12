@@ -28,24 +28,6 @@ SOURCES += \
     wirelessnetworkdevice.cpp \
     networkmanagerutils.cpp
 
-equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 7) {
-    message(Building with Bluetooth LE server functionality. Qt $${QT_VERSION}.)
-
-    QT += bluetooth
-
-    HEADERS += \
-        bluetooth/bluetoothserver.h \
-        bluetooth/bluetoothuuids.h \
-        bluetooth/networkservice.h \
-        bluetooth/wirelessservice.h \
-
-    SOURCES += \
-        bluetooth/bluetoothserver.cpp \
-        bluetooth/networkservice.cpp \
-        bluetooth/wirelessservice.cpp \
-} else {
-    message(Bluetooth LE server functionality not supported with Qt $${QT_VERSION}.)
-}
 
 target.path = $$[QT_INSTALL_LIBS]
 INSTALLS += target
