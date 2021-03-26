@@ -39,9 +39,11 @@
 #include "bluetoothserver.h"
 #include "../networkmanager.h"
 #include "../networkmanagerutils.h"
+#include "bluetoothuuids.h"
 
 #include <QFile>
 #include <QSysInfo>
+#include <QBluetoothUuid>
 
 BluetoothServer::BluetoothServer(NetworkManager *networkManager) :
     QObject(networkManager),
@@ -66,9 +68,10 @@ QString BluetoothServer::advertiseName() const
     return m_advertiseName;
 }
 
-void BluetoothServer::setAdvertiseName(const QString &advertiseName)
+void BluetoothServer::setAdvertiseName(const QString &advertiseName, bool forceFullName)
 {
     m_advertiseName = advertiseName;
+    m_forceFullName = forceFullName;
 }
 
 QString BluetoothServer::modelName() const
@@ -461,9 +464,22 @@ void BluetoothServer::start()
 
     QLowEnergyAdvertisingData advertisingData;
     advertisingData.setDiscoverability(QLowEnergyAdvertisingData::DiscoverabilityGeneral);
-    advertisingData.setIncludePowerLevel(true);
-    advertisingData.setLocalName(m_advertiseName);
-    // FIXME: set manufacturer SIG data once available
+    // Setting the wireless service UUID to the advertise data.
+    // Given that nymea-networkmanager doesn't have a registered service UUID (yet), we need
+    // to write the full UUID which takes up most of the advertise data space. Because of
+    // this, we can only fit 8 character device name and nothing else.
+    // Registering a service UUID with the BT SIG would allow to use shortened uuids and leave
+    // more space for device name, multiple uuids, or other info (in that case we'd likely also have manufacturer
+    // data to add here).
+    // Anyhow, for now, 8 characters device name it is with the single wireless service UUID.
+    advertisingData.setServices({wirelessServiceUuid});
+
+    if (m_forceFullName || m_advertiseName.length() <= 8) {
+        advertisingData.setLocalName(m_advertiseName);
+    } else {
+        qCWarning(dcNetworkManagerBluetoothServer()) << "Truncating local host name to" << m_advertiseName.left(8) << "(maximum length of 8 characters exceeded)";
+        advertisingData.setLocalName(m_advertiseName.left(8));
+    }
 
     // Note: start advertising in 100 ms interval, this makes the device better discoverable on certain phones
     QLowEnergyAdvertisingParameters advertisingParameters;
