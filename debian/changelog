@@ -1,7 +1,9 @@
-libnymea-networkmanager (0.5.0) UNRELEASED; urgency=medium
+libnymea-networkmanager (0.5.0) xenial; urgency=medium
 
+  [ Michael Zanetti ]
+  * Add the wireless service UUID to the SDP record
 
- -- Michael Zanetti <michael.zanetti@nymea.io>  Sat, 27 Mar 2021 00:32:57 +0100
+ -- Jenkins <jenkins@nymea.io>  Fri, 16 Apr 2021 23:37:54 +0200
 
 libnymea-networkmanager (0.4.2) xenial; urgency=medium
 
