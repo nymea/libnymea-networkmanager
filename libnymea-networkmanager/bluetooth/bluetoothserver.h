@@ -60,7 +60,7 @@ public:
     ~BluetoothServer();
 
     QString advertiseName() const;
-    void setAdvertiseName(const QString &advertiseName);
+    void setAdvertiseName(const QString &advertiseName, bool forceFullName = false);
 
     // Information for the device info service
     QString modelName() const;
@@ -80,6 +80,7 @@ public:
 
 private:
     QString m_advertiseName;
+    bool m_forceFullName = false;
 
     QString m_modelName;
     QString m_softwareVersion;

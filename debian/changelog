@@ -1,3 +1,8 @@
+libnymea-networkmanager (0.5.0) UNRELEASED; urgency=medium
+
+
+ -- Michael Zanetti <michael.zanetti@nymea.io>  Sat, 27 Mar 2021 00:32:57 +0100
+
 libnymea-networkmanager (0.4.2) xenial; urgency=medium
 
   [ Michael Zanetti ]
