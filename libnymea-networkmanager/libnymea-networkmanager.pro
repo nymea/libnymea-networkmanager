@@ -34,7 +34,7 @@ SOURCES += \
     wirelessnetworkdevice.cpp \
     networkmanagerutils.cpp
 
-equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 7) {
+equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 7):qtHaveModule(bluetooth) {
     message(Building with Bluetooth LE server functionality. Qt $${QT_VERSION}.)
 
     QT += bluetooth
