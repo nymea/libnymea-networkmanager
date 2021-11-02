@@ -244,7 +244,7 @@ NetworkManager::NetworkManagerError NetworkManager::startAccessPoint(const QStri
     // Create network settings for access point
     QVariantMap connectionSettings;
     connectionSettings.insert("id", ssid);
-    connectionSettings.insert("autoconnect", false);
+    connectionSettings.insert("autoconnect", true);
     connectionSettings.insert("uuid", QUuid::createUuid().toString().remove("{").remove("}"));
     connectionSettings.insert("type", "802-11-wireless");
 
