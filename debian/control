@@ -30,13 +30,3 @@ Depends: ${shlibs:Depends},
     libnymea-networkmanager (= ${binary:Version}),
 Description: Qt 5 based library for the network-manager DBus API - development files
   Development files for Qt 5 based network-manager DBus API.
-
-Package: libnymea-networkmanager-dbg
-Priority: extra
-Architecture: any
-Section: debug
-Depends: ${shlibs:Depends},
-    ${misc:Depends},
-    libnymea-networkmanager (= ${binary:Version})
-Description: Qt 5 based library for the network-manager DBus API - debug symbols
-  Debug Symbols for Qt 5 based network-manager DBus API.
