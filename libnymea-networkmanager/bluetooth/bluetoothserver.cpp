@@ -290,6 +290,7 @@ void BluetoothServer::onHostModeStateChanged(const QBluetoothLocalDevice::HostMo
         break;
     case QBluetoothLocalDevice::HostPoweredOff:
         qCDebug(dcNetworkManagerBluetoothServer()) << "Bluetooth host in power off mode.";
+        setRunning(false);
         break;
     case QBluetoothLocalDevice::HostDiscoverableLimitedInquiry:
         qCDebug(dcNetworkManagerBluetoothServer()) << "Bluetooth host in discoverable limited inquiry mode.";
@@ -310,7 +311,7 @@ void BluetoothServer::onDeviceDisconnected(const QBluetoothAddress &address)
 
 void BluetoothServer::onError(QLowEnergyController::Error error)
 {
-    qCWarning(dcNetworkManagerBluetoothServer()) << "Bluetooth error occured:" << error << m_controller->errorString();
+    qCWarning(dcNetworkManagerBluetoothServer()) << "Bluetooth error occurred:" << error << m_controller->errorString();
 }
 
 void BluetoothServer::onConnected()
@@ -322,6 +323,7 @@ void BluetoothServer::onConnected()
 void BluetoothServer::onDisconnected()
 {
     qCDebug(dcNetworkManagerBluetoothServer()) << "Client disconnected";
+    setConnected(false);
     stop();
 }
 
@@ -330,6 +332,7 @@ void BluetoothServer::onControllerStateChanged(QLowEnergyController::ControllerS
     switch (state) {
     case QLowEnergyController::UnconnectedState:
         qCDebug(dcNetworkManagerBluetoothServer()) << "Controller state disonnected.";
+        setConnected(false);
         setRunning(false);
         break;
     case QLowEnergyController::ConnectingState:
