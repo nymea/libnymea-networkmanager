@@ -362,6 +362,7 @@ QStringList NetworkDevice::readIpAddresses(const QString &property, const QStrin
             arg >> m;
             ret.append(m.value("address").toString());
         }
+        arg.endArray();
     }
     return ret;
 }
