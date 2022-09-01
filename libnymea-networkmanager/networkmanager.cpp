@@ -133,7 +133,7 @@ NetworkManager::NetworkManagerConnectivityState NetworkManager::connectivityStat
 }
 
 /*! Connect the given \a interface to a wifi network with the given \a ssid and \a password. Returns the \l{NetworkManagerError} to inform about the result. \sa NetworkManagerError, */
-NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &interface, const QString &ssid, const QString &password, bool hidden)
+NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &interface, const QString &ssid, const QString &password, AuthAlgorithm authAlgorithm, KeyManagement keyManagement, bool hidden)
 {
     // Check interface
     if (!getNetworkDevice(interface))
@@ -150,14 +150,20 @@ NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &i
     if (!wirelessNetworkDevice)
         return NetworkManagerErrorInvalidNetworkDeviceType;
 
-    // Get the access point object path
-    WirelessAccessPoint *accessPoint = wirelessNetworkDevice->getAccessPoint(ssid);
-    if (!accessPoint)
-        return NetworkManagerErrorAccessPointNotFound;
+    if (!hidden) {
+        // Get the access point object path
+        WirelessAccessPoint *accessPoint = wirelessNetworkDevice->getAccessPoint(ssid);
+        if (!accessPoint) {
+            return NetworkManagerErrorAccessPointNotFound;
+        }
+
+        qCDebug(dcNetworkManager()) << "Connecting to" << accessPoint;
+    } else {
+        qCDebug(dcNetworkManager()) << "Connecting to hidden WiFi:" << ssid;
+    }
 
     // Note: https://developer.gnome.org/NetworkManager/stable/ref-settings.html
 
-    qCDebug(dcNetworkManager()) << "Start connecting to" << accessPoint << "hidden:" << hidden;
 
     // Create network settings for this wifi
     QVariantMap connectionSettings;
@@ -175,11 +181,23 @@ NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &i
     // Note: disable power save mode
     wirelessSettings.insert("powersave", 2);
 
-    if (hidden) wirelessSettings.insert("hidden", true);
+    if (hidden) {
+        wirelessSettings.insert("hidden", true);
+    }
 
     QVariantMap wirelessSecuritySettings;
-    wirelessSecuritySettings.insert("auth-alg", "open");
-    wirelessSecuritySettings.insert("key-mgmt", "wpa-psk");
+    switch (authAlgorithm) {
+    case AuthAlgorithmOpen:
+        wirelessSecuritySettings.insert("auth-alg", "open");
+        break;
+    }
+
+    switch (keyManagement) {
+    case KeyManagementWpaPsk:
+        wirelessSecuritySettings.insert("key-mgmt", "wpa-psk");
+        break;
+    }
+
     wirelessSecuritySettings.insert("psk", password);
 
     QVariantMap ipv4Settings;
@@ -195,8 +213,9 @@ NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &i
     settings.insert("ipv4", ipv4Settings);
     settings.insert("ipv6", ipv6Settings);
 
-    if (accessPoint->isProtected())
+    if (!password.isEmpty()) {
         settings.insert("802-11-wireless-security", wirelessSecuritySettings);
+    }
 
     // Remove old configuration (if there is any)
     foreach (NetworkConnection *connection, m_networkSettings->connections()) {
@@ -211,7 +230,7 @@ NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &i
         return NetworkManagerErrorWirelessConnectionFailed;
 
     // Activate connection
-    QDBusMessage query = m_networkManagerInterface->call("ActivateConnection", QVariant::fromValue(connectionObjectPath), QVariant::fromValue(wirelessNetworkDevice->objectPath()), QVariant::fromValue(accessPoint->objectPath()));
+    QDBusMessage query = m_networkManagerInterface->call("ActivateConnection", QVariant::fromValue(connectionObjectPath), QVariant::fromValue(wirelessNetworkDevice->objectPath()), QVariant::fromValue(QDBusObjectPath("/")));
     if (query.type() != QDBusMessage::ReplyMessage) {
         qCWarning(dcNetworkManager()) << query.errorName() << query.errorMessage();
         return NetworkManagerErrorWirelessConnectionFailed;
