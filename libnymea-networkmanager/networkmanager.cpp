@@ -259,6 +259,8 @@ NetworkManager::NetworkManagerError NetworkManager::startAccessPoint(const QStri
     QVariantMap wirelessSecuritySettings;
     wirelessSecuritySettings.insert("key-mgmt", "wpa-psk");
     wirelessSecuritySettings.insert("psk", password);
+    wirelessSecuritySettings.insert("group", QStringList() << "ccmp");
+    wirelessSecuritySettings.insert("pairwise", QStringList() << "ccmp");
     wirelessSecuritySettings.insert("proto", QStringList() << "rsn"); // Force WPA2
 
     QVariantMap ipv4Settings;
