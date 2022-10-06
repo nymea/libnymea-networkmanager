@@ -46,19 +46,18 @@ public:
     int bitRate() const;
     bool pluggedIn() const;
 
+signals:
+    void pluggedInChanged(bool pluggedIn);
+
+private slots:
+    void propertiesChanged(const QString &interface_name, const QVariantMap &changed_properties, const QStringList &invalidated_properties);
+
 private:
     QDBusInterface *m_wiredInterface = nullptr;
 
     QString m_macAddress;
     int m_bitRate = 0;
     bool m_pluggedIn = false;
-
-    void setMacAddress(const QString &macAddress);
-    void setBitRate(int bitRate);
-    void setPluggedIn(bool pluggedIn);
-
-private slots:
-    void propertiesChanged(const QVariantMap &properties);
 
 };
 

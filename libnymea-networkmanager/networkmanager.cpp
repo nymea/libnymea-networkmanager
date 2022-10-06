@@ -46,6 +46,8 @@
 #include <QTimer>
 #include <QMetaEnum>
 
+#include <arpa/inet.h>
+
 /*! Constructs a new \l{NetworkManager} object with the given \a parent. */
 NetworkManager::NetworkManager(QObject *parent) :
     QObject(parent)
@@ -222,7 +224,7 @@ NetworkManager::NetworkManagerError NetworkManager::connectWifi(const QString &i
 
 NetworkManager::NetworkManagerError NetworkManager::startAccessPoint(const QString &interface, const QString &ssid, const QString &password)
 {
-    qCDebug(dcNetworkManager()) << "Start an access point for" << interface << "SSID:" <<  ssid << "password:" << password;
+    qCDebug(dcNetworkManager()) << "Starting access point for" << interface << "SSID:" <<  ssid << "password:" << password;
 
     // Check interface
     if (!getNetworkDevice(interface))
@@ -298,6 +300,224 @@ NetworkManager::NetworkManagerError NetworkManager::startAccessPoint(const QStri
     if (query.type() != QDBusMessage::ReplyMessage) {
         qCWarning(dcNetworkManager()) << query.errorName() << query.errorMessage();
         return NetworkManagerErrorWirelessConnectionFailed;
+    }
+
+    return NetworkManagerErrorNoError;
+}
+
+NetworkManager::NetworkManagerError NetworkManager::createWiredAutoConnection(const QString &interface)
+{
+    qCDebug(dcNetworkManager()) << "Creating auto connection for" << interface;
+
+    NetworkDevice *networkDevice = getNetworkDevice(interface);
+    if (!networkDevice) {
+        return NetworkManagerErrorNetworkInterfaceNotFound;
+    }
+
+    QVariantMap ethernetMode {
+        {"duplex", "full"}
+    };
+
+    QVariantMap connectionSettings {
+        {"id", "auto"},
+        {"autoconnect", true},
+        {"uuid", QUuid::createUuid().toString().remove(QRegExp("[{}]"))},
+        {"type", "802-3-ethernet"}
+    };
+
+    QVariantMap ipv4Settings {
+        {"method", "auto"}
+    };
+
+    QVariantMap ipv6Settings {
+        {"method", "auto"}
+    };
+
+    ConnectionSettings settings;
+    settings.insert("connection", connectionSettings);
+    settings.insert("ipv4", ipv4Settings);
+    settings.insert("ipv6", ipv6Settings);
+    settings.insert("802-3-ethernet", ethernetMode);
+
+    // Remove old configuration (if there is any)
+    foreach (NetworkConnection *connection, m_networkSettings->connections()) {
+        if (connection->id() == connectionSettings.value("id")) {
+            connection->deleteConnection();
+        }
+    }
+
+    // Add connection
+    QDBusObjectPath connectionObjectPath = m_networkSettings->addConnection(settings);
+    if (connectionObjectPath.path().isEmpty())
+        return NetworkManagerErrorUnknownError;
+
+
+    qCDebug(dcNetworkManager()) << "Connection added" << connectionObjectPath.path();
+
+    // Activate connection
+    QDBusMessage query = m_networkManagerInterface->call("ActivateConnection",
+                                                         QVariant::fromValue(connectionObjectPath),
+                                                         QVariant::fromValue(networkDevice->objectPath()),
+                                                         QVariant::fromValue(QDBusObjectPath("/")));
+    if (query.type() != QDBusMessage::ReplyMessage) {
+        qCWarning(dcNetworkManager()) << query.errorName() << query.errorMessage();
+        return NetworkManagerErrorUnknownError;
+    }
+
+    return NetworkManagerErrorNoError;
+}
+
+NetworkManager::NetworkManagerError NetworkManager::createWiredManualConnection(const QString &interface, const QHostAddress &ip, quint8 prefix, const QHostAddress &gateway, const QHostAddress &dns)
+{
+    qCDebug(dcNetworkManager()) << "Creating manual connection for" << interface << ip << prefix << gateway << dns;
+
+    NetworkDevice *networkDevice = getNetworkDevice(interface);
+    if (!networkDevice) {
+        return NetworkManagerErrorNetworkInterfaceNotFound;
+    }
+    if (ip.isNull() || prefix < 8) {
+        return NetworkManagerErrorInvalidConfiguration;
+    }
+
+    QVariantMap ethernetMode {
+        {"duplex", "full"}
+    };
+
+    QVariantMap connectionSettings {
+        {"id", "manual"},
+        {"autoconnect", true},
+        {"uuid", QUuid::createUuid().toString().remove(QRegExp("[{}]"))},
+        {"type", "802-3-ethernet"}
+    };
+
+    NMIntListList addresses;
+    QList<uint> address;
+    address << inet_addr(ip.toString().toLocal8Bit().data());
+    address << prefix;
+    address << inet_addr(gateway.toString().toLocal8Bit().data());
+    addresses << address;
+
+    NMVariantMapList addressData;
+    addressData.append({{"address", ip.toString()}, {"prefix", prefix}});
+
+    QVariantMap ipv4Settings {
+        {"method", "manual"},
+        {"addresses", QVariant::fromValue(addresses)}, // Deprecated but for our supported platforms still required
+        {"address-data", QVariant::fromValue(addressData)} // New style, but ignored by NM as long as addresses is still supported and given
+    };
+    if (!dns.isNull()) {
+        ipv4Settings.insert("dns", QVariant::fromValue(NMIntList{inet_addr(dns.toString().toLocal8Bit().data())}));
+    }
+
+    // This is ignored if addresses is given, but it's required once the deprecated addresses entry is removed
+    if (!gateway.isNull()) {
+        ipv4Settings.insert("gateway", gateway.toString());
+    }
+
+    QVariantMap ipv6Settings {
+        {"method", "disabled"}
+    };
+
+    ConnectionSettings settings;
+    settings.insert("connection", connectionSettings);
+    settings.insert("ipv4", ipv4Settings);
+    settings.insert("ipv6", ipv6Settings);
+    settings.insert("802-3-ethernet", ethernetMode);
+
+    // Remove old configuration (if there is any)
+    foreach (NetworkConnection *connection, m_networkSettings->connections()) {
+        if (connection->id() == connectionSettings.value("id")) {
+            connection->deleteConnection();
+        }
+    }
+
+    // Add connection
+    QDBusObjectPath connectionObjectPath = m_networkSettings->addConnection(settings);
+    if (connectionObjectPath.path().isEmpty())
+        return NetworkManagerErrorUnknownError;
+
+
+    qCDebug(dcNetworkManager()) << "Connection added" << connectionObjectPath.path();
+
+    // Activate connection
+    QDBusMessage query = m_networkManagerInterface->call("ActivateConnection",
+                                                         QVariant::fromValue(connectionObjectPath),
+                                                         QVariant::fromValue(networkDevice->objectPath()),
+                                                         QVariant::fromValue(QDBusObjectPath("/")));
+    if (query.type() != QDBusMessage::ReplyMessage) {
+        qCWarning(dcNetworkManager()) << query.errorName() << query.errorMessage();
+        return NetworkManagerErrorUnknownError;
+    }
+
+    return NetworkManagerErrorNoError;
+
+}
+
+NetworkManager::NetworkManagerError NetworkManager::createSharedConnection(const QString &interface, const QHostAddress &ip, quint8 prefix)
+{
+    qCDebug(dcNetworkManager()) << "Starting shared connection for" << interface;
+
+    NetworkDevice *networkDevice = getNetworkDevice(interface);
+    if (!networkDevice) {
+        return NetworkManagerErrorNetworkInterfaceNotFound;
+    }
+
+    QVariantMap connectionSettings;
+    connectionSettings.insert("id", "shared");
+    connectionSettings.insert("autoconnect", true);
+    connectionSettings.insert("uuid", QUuid::createUuid().toString().remove("{").remove("}"));
+    connectionSettings.insert("type", "802-3-ethernet");
+
+    NMIntListList addresses;
+    QList<uint> address;
+    address << inet_addr(ip.toString().toLocal8Bit().data());
+    address << prefix;
+    address << 0;
+    addresses << address;
+
+    NMVariantMapList addressData;
+    addressData.append({{"address", ip.toString()}, {"prefix", prefix}});
+
+    QVariantMap ipv4Settings {
+        {"method", "shared"}
+    };
+    if (!ip.isNull()) {
+        ipv4Settings.insert("addresses", QVariant::fromValue(addresses)); // Deprecated but for our supported platforms still required
+        ipv4Settings.insert("address-data", QVariant::fromValue(addressData)); // New style, but ignored by NM as long as addresses is still supported and given
+    }
+
+    QVariantMap ipv6Settings;
+    ipv6Settings.insert("method", "disabled");
+
+    // Build connection object
+    ConnectionSettings settings;
+    settings.insert("connection", connectionSettings);
+    settings.insert("ipv4", ipv4Settings);
+    settings.insert("ipv6", ipv6Settings);
+
+    // Remove old configuration (if there is any)
+    foreach (NetworkConnection *connection, m_networkSettings->connections()) {
+        if (connection->id() == connectionSettings.value("id")) {
+            connection->deleteConnection();
+        }
+    }
+
+    // Add connection
+    QDBusObjectPath connectionObjectPath = m_networkSettings->addConnection(settings);
+    if (connectionObjectPath.path().isEmpty())
+        return NetworkManagerErrorUnknownError;
+
+
+    qCDebug(dcNetworkManager()) << "Connection added" << connectionObjectPath.path();
+
+    // Activate connection
+    QDBusMessage query = m_networkManagerInterface->call("ActivateConnection",
+                                                         QVariant::fromValue(connectionObjectPath),
+                                                         QVariant::fromValue(networkDevice->objectPath()),
+                                                         QVariant::fromValue(QDBusObjectPath("/")));
+    if (query.type() != QDBusMessage::ReplyMessage) {
+        qCWarning(dcNetworkManager()) << query.errorName() << query.errorMessage();
+        return NetworkManagerErrorUnknownError;
     }
 
     return NetworkManagerErrorNoError;
@@ -630,13 +850,13 @@ void NetworkManager::onPropertiesChanged(const QVariantMap &properties)
 
 void NetworkManager::onWirelessDeviceChanged()
 {
-    WirelessNetworkDevice *networkDevice = static_cast<WirelessNetworkDevice *>(sender());
+    WirelessNetworkDevice *networkDevice = qobject_cast<WirelessNetworkDevice *>(sender());
     emit wirelessDeviceChanged(networkDevice);
 }
 
 void NetworkManager::onWiredDeviceChanged()
 {
-    WiredNetworkDevice *networkDevice = static_cast<WiredNetworkDevice *>(sender());
+    WiredNetworkDevice *networkDevice = qobject_cast<WiredNetworkDevice *>(sender());
     emit wiredDeviceChanged(networkDevice);
 }
 

@@ -219,28 +219,31 @@ void WirelessNetworkDevice::accessPointRemoved(const QDBusObjectPath &objectPath
     accessPoint->deleteLater();
 }
 
-void WirelessNetworkDevice::propertiesChanged(const QVariantMap &properties)
+void WirelessNetworkDevice::propertiesChanged(const QString &interface_name, const QVariantMap &changed_properties, const QStringList &invalidated_properties)
 {
+    Q_UNUSED(interface_name)
+    Q_UNUSED(invalidated_properties)
+
     //qCDebug(dcNetworkManager()) << "WirelessNetworkDevice: Property changed" << properties;
 
-    if (properties.contains("Bitrate")) {
-        m_bitRate = properties.value("Bitrate").toInt() / 1000;
+    if (changed_properties.contains("Bitrate")) {
+        m_bitRate = changed_properties.value("Bitrate").toInt() / 1000;
         emit bitRateChanged(m_bitRate);
     }
 
-    if (properties.contains("Mode")) {
+    if (changed_properties.contains("Mode")) {
         m_wirelessMode = static_cast<WirelessMode>(m_wirelessInterface->property("Mode").toUInt());
         emit wirelessModeChanged(m_wirelessMode);
     }
 
     // Note: available since 1.12 (-1 means never scanned)
-    if (properties.contains("LastScan")) {
+    if (changed_properties.contains("LastScan")) {
         m_lastScan = m_wirelessInterface->property("LastScan").toInt();
         emit lastScanChanged(m_lastScan);
     }
 
-    if (properties.contains("ActiveAccessPoint")) {
-        setActiveAccessPoint(qdbus_cast<QDBusObjectPath>(properties.value("ActiveAccessPoint")));
+    if (changed_properties.contains("ActiveAccessPoint")) {
+        setActiveAccessPoint(qdbus_cast<QDBusObjectPath>(changed_properties.value("ActiveAccessPoint")));
     }
 
     emit deviceChanged();

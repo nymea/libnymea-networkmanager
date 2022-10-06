@@ -46,6 +46,10 @@
 NetworkSettings::NetworkSettings(QObject *parent) :
     QObject(parent)
 {
+    qDBusRegisterMetaType<NMVariantMapList>();
+    qDBusRegisterMetaType<NMIntListList>();
+    qDBusRegisterMetaType<NMIntList>();
+
     m_settingsInterface = new QDBusInterface(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::settingsPathString(), NetworkManagerUtils::settingsInterfaceString(), QDBusConnection::systemBus(), this);
     if(!m_settingsInterface->isValid()) {
         qCWarning(dcNetworkManager()) << "Invalid DBus network settings interface";

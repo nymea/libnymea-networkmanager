@@ -78,7 +78,7 @@ signals:
 private slots:
     void accessPointAdded(const QDBusObjectPath &objectPath);
     void accessPointRemoved(const QDBusObjectPath &objectPath);
-    void propertiesChanged(const QVariantMap &properties);
+    void propertiesChanged(const QString &interface_name, const QVariantMap &changed_properties, const QStringList &invalidated_properties);
 
 private:
     QDBusInterface *m_wirelessInterface = nullptr;

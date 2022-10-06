@@ -41,6 +41,15 @@
 
 class NetworkConnection;
 
+typedef QList<QVariantMap> NMVariantMapList;
+Q_DECLARE_METATYPE(NMVariantMapList)
+
+typedef QList<QList<uint>> NMIntListList;
+Q_DECLARE_METATYPE(NMIntListList)
+
+typedef QList<uint> NMIntList;
+Q_DECLARE_METATYPE(NMIntList)
+
 class NetworkSettings : public QObject
 {
     Q_OBJECT
