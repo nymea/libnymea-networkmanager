@@ -58,11 +58,11 @@ WiredNetworkDevice::WiredNetworkDevice(const QDBusObjectPath &objectPath, QObjec
         return;
     }
 
-    setMacAddress(m_wiredInterface->property("HwAddress").toString());
-    setBitRate(m_wiredInterface->property("Bitrate").toInt());
-    setPluggedIn(m_wiredInterface->property("Carrier").toBool());
+    m_macAddress = m_wiredInterface->property("HwAddress").toString();
+    m_bitRate = m_wiredInterface->property("Bitrate").toInt();
+    m_pluggedIn = m_wiredInterface->property("Carrier").toBool();
 
-    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), this->objectPath().path(), NetworkManagerUtils::wiredInterfaceString(), "PropertiesChanged", this, SLOT(propertiesChanged(QVariantMap)));
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), this->objectPath().path(), "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(propertiesChanged(QString, QVariantMap, QStringList)));
 }
 
 /*! Returns the mac address of this \l{WiredNetworkDevice}. */
@@ -83,26 +83,16 @@ bool WiredNetworkDevice::pluggedIn() const
     return m_pluggedIn;
 }
 
-void WiredNetworkDevice::setMacAddress(const QString &macAddress)
+void WiredNetworkDevice::propertiesChanged(const QString &interface_name, const QVariantMap &changed_properties, const QStringList &invalidated_properties)
 {
-    m_macAddress = macAddress;
-}
+    Q_UNUSED(interface_name)
+    Q_UNUSED(invalidated_properties)
+    if (changed_properties.contains("Carrier")) {
+        m_pluggedIn = changed_properties.value("Carrier").toBool();
+        emit pluggedInChanged(m_pluggedIn);
+    }
 
-void WiredNetworkDevice::setBitRate(int bitRate)
-{
-    m_bitRate = bitRate;
-}
-
-void WiredNetworkDevice::setPluggedIn(bool pluggedIn)
-{
-    m_pluggedIn = pluggedIn;
-}
-
-void WiredNetworkDevice::propertiesChanged(const QVariantMap &properties)
-{
-    if (properties.contains("Carrier"))
-        setPluggedIn(properties.value("Carrier").toBool());
-
+    emit deviceChanged();
 }
 
 QDebug operator<<(QDebug debug, WiredNetworkDevice *networkDevice)

@@ -38,6 +38,7 @@
 #include <QDBusInterface>
 #include <QDBusConnection>
 #include <QDBusServiceWatcher>
+#include <QHostAddress>
 
 #include "networksettings.h"
 #include "wirednetworkdevice.h"
@@ -85,7 +86,8 @@ public:
         NetworkManagerErrorWirelessNetworkingDisabled,
         NetworkManagerErrorWirelessConnectionFailed,
         NetworkManagerErrorNetworkingDisabled,
-        NetworkManagerErrorNetworkManagerNotAvailable
+        NetworkManagerErrorNetworkManagerNotAvailable,
+        NetworkManagerErrorInvalidConfiguration,
     };
     Q_ENUM(NetworkManagerError)
 
@@ -120,6 +122,9 @@ public:
 
     NetworkManagerError connectWifi(const QString &interface, const QString &ssid, const QString &password, AuthAlgorithm authAlgorithm = AuthAlgorithmOpen, KeyManagement keyManagement = KeyManagementWpaPsk, bool hidden = false);
     NetworkManagerError startAccessPoint(const QString &interface, const QString &ssid, const QString &password);
+    NetworkManagerError createWiredAutoConnection(const QString &interface);
+    NetworkManagerError createWiredManualConnection(const QString &interface, const QHostAddress &ip, quint8 prefix, const QHostAddress &gateway, const QHostAddress &dns);
+    NetworkManagerError createSharedConnection(const QString& interface, const QHostAddress &ip, quint8 prefix);
 
     // Networking
     bool networkingEnabled() const;

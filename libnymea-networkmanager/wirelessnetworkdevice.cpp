@@ -82,7 +82,10 @@ WirelessNetworkDevice::WirelessNetworkDevice(const QDBusObjectPath &objectPath, 
 
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), this->objectPath().path(), NetworkManagerUtils::wirelessInterfaceString(), "AccessPointAdded", this, SLOT(accessPointAdded(QDBusObjectPath)));
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), this->objectPath().path(), NetworkManagerUtils::wirelessInterfaceString(), "AccessPointRemoved", this, SLOT(accessPointRemoved(QDBusObjectPath)));
+    // org.freedesktop.NetworkManager.Device.Wireless.PropertiesChanged(QVariantMap) is used in older versions of NetworkManager instead of the standard D-Bus properties changed signal
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), this->objectPath().path(), NetworkManagerUtils::wirelessInterfaceString(), "PropertiesChanged", this, SLOT(propertiesChanged(QVariantMap)));
+    // Newer versions of NetworkManager dropped the other and switched to the D-Bus standard PropertiesChanged
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), this->objectPath().path(), "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(propertiesChanged(QString, QVariantMap, QStringList)));
 
     readAccessPoints();
 
@@ -244,6 +247,13 @@ void WirelessNetworkDevice::propertiesChanged(const QVariantMap &properties)
     }
 
     emit deviceChanged();
+}
+
+void WirelessNetworkDevice::propertiesChanged(const QString &interface_name, const QVariantMap &changed_properties, const QStringList &invalidated_properties)
+{
+    Q_UNUSED(interface_name)
+    Q_UNUSED(invalidated_properties)
+    propertiesChanged(changed_properties);
 }
 
 /*! Writes the given \a device to the given to \a debug. \sa WirelessNetworkDevice, */

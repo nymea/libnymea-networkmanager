@@ -183,12 +183,21 @@ public:
     QDBusObjectPath ip4Config() const;
     QList<QDBusObjectPath> availableConnections() const;
 
-    // Method
     void disconnectDevice();
 
     static QString deviceTypeToString(const NetworkDeviceType &deviceType);
     static QString deviceStateToString(const NetworkDeviceState &deviceState);
     static QString deviceStateReasonToString(const NetworkDeviceStateReason &deviceStateReason);
+
+signals:
+    void deviceChanged();
+    void stateChanged(const NetworkDeviceState &state);
+
+private slots:
+    void onStateChanged(uint newState, uint oldState, uint reason);
+
+private:
+    QStringList readIpAddresses(const QString &property, const QString &interface);
 
 private:
     QDBusInterface *m_networkDeviceInterface = nullptr;
@@ -214,17 +223,6 @@ private:
     QDBusObjectPath m_activeConnection;
 
     QList<QDBusObjectPath> m_availableConnections;
-
-private:
-    QStringList readIpAddresses(const QString &property, const QString &interface);
-
-private slots:
-    void onStateChanged(uint newState, uint oldState, uint reason);
-
-signals:
-    void deviceChanged();
-    void stateChanged(const NetworkDeviceState &state);
-
 
 };
 
