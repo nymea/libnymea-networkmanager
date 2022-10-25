@@ -89,6 +89,16 @@ public:
     };
     Q_ENUM(NetworkManagerError)
 
+    enum AuthAlgorithm {
+        AuthAlgorithmOpen
+    };
+    Q_ENUM(AuthAlgorithm)
+
+    enum KeyManagement {
+        KeyManagementWpaPsk
+    };
+    Q_ENUM(KeyManagement)
+
     explicit NetworkManager(QObject *parent = nullptr);
     ~NetworkManager();
 
@@ -108,7 +118,7 @@ public:
     QString stateString() const;
     NetworkManagerConnectivityState connectivityState() const;
 
-    NetworkManagerError connectWifi(const QString &interface, const QString &ssid, const QString &password, bool hidden = false);
+    NetworkManagerError connectWifi(const QString &interface, const QString &ssid, const QString &password, AuthAlgorithm authAlgorithm = AuthAlgorithmOpen, KeyManagement keyManagement = KeyManagementWpaPsk, bool hidden = false);
     NetworkManagerError startAccessPoint(const QString &interface, const QString &ssid, const QString &password);
 
     // Networking

@@ -49,7 +49,6 @@ public:
         WirelessServiceCommandInvalid               = -1,
         WirelessServiceCommandGetNetworks           = 0x00,
         WirelessServiceCommandConnect               = 0x01,
-        WirelessServiceCommandConnectHidden         = 0x02,
         WirelessServiceCommandDisconnect            = 0x03,
         WirelessServiceCommandScan                  = 0x04,
         WirelessServiceCommandGetCurrentConnection  = 0x05,
@@ -95,7 +94,6 @@ private:
     // Methods
     void commandGetNetworks(const QVariantMap &request);
     void commandConnect(const QVariantMap &request);
-    void commandConnectHidden(const QVariantMap &request);
     void commandDisconnect(const QVariantMap &request);
     void commandScan(const QVariantMap &request);
     void commandGetCurrentConnection(const QVariantMap &request);

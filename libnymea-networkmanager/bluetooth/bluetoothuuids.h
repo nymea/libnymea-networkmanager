@@ -45,5 +45,6 @@ static QBluetoothUuid wirelessCommanderCharacteristicUuid = QBluetoothUuid(QUuid
 static QBluetoothUuid wirelessResponseCharacteristicUuid =  QBluetoothUuid(QUuid("e081fec2-f757-4449-b9c9-bfa83133f7fc"));
 static QBluetoothUuid wirelessStateCharacteristicUuid =     QBluetoothUuid(QUuid("e081fec3-f757-4449-b9c9-bfa83133f7fc"));
 static QBluetoothUuid wirelessModeCharacteristicUuid =      QBluetoothUuid(QUuid("e081fec4-f757-4449-b9c9-bfa83133f7fc"));
+static QBluetoothUuid wirelessServiceVersionCharacteristicUuid = QBluetoothUuid(QUuid("e081fec5-f757-4449-b9c9-bfa83133f7fc"));
 
 #endif // BLUETOOTHUUIDS_H

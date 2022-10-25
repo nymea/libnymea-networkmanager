@@ -84,6 +84,13 @@ QLowEnergyServiceData WirelessService::serviceData(NetworkManager *networkManage
 
     QLowEnergyDescriptorData clientConfigDescriptorData(QBluetoothUuid::ClientCharacteristicConfiguration, QByteArray(2, 0));
 
+    QLowEnergyCharacteristicData versionCharacteristicData;
+    versionCharacteristicData.setUuid(wirelessServiceVersionCharacteristicUuid);
+    versionCharacteristicData.setProperties(QLowEnergyCharacteristic::Read);
+    versionCharacteristicData.setValueLength(1, 1);
+    versionCharacteristicData.setValue("2");
+    serviceData.addCharacteristic(versionCharacteristicData);
+
     // Wifi commander characterisitc e081fec1-f757-4449-b9c9-bfa83133f7fc
     QLowEnergyCharacteristicData wirelessCommanderCharacteristicData;
     wirelessCommanderCharacteristicData.setUuid(wirelessCommanderCharacteristicUuid);
@@ -219,11 +226,9 @@ void WirelessService::streamData(const QVariantMap &responseMap)
     QByteArray data = QJsonDocument::fromVariant(responseMap).toJson(QJsonDocument::Compact) + '\n';
     qCDebug(dcNetworkManagerBluetoothServer()) << "WirelessService: Start streaming response data:" << data.count() << "bytes";
 
-    int sentDataLength = 0;
     QByteArray remainingData = data;
     while (!remainingData.isEmpty()) {
         QByteArray package = remainingData.left(20);
-        sentDataLength += package.count();
         m_service->writeCharacteristic(characteristic, package);
         remainingData = remainingData.remove(0, package.count());
     }
@@ -296,7 +301,33 @@ void WirelessService::commandConnect(const QVariantMap &request)
         return;
     }
 
-    NetworkManager::NetworkManagerError networkError = m_networkManager->connectWifi(m_device->interface(), parameters.value("e").toString(), parameters.value("p").toString());
+    NetworkManager::AuthAlgorithm authAlgorithm = NetworkManager::AuthAlgorithmOpen;
+    if (parameters.contains("a")) {
+        QString alg = parameters.value("a").toString();
+        if (alg == "open") {
+            authAlgorithm = NetworkManager::AuthAlgorithmOpen;
+        } else {
+            qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Connect command: Invalid authentication algorithm parameter.";
+            streamData(createResponse(WirelessServiceCommandConnect, WirelessServiceResponseIvalidParameters));
+            return;
+        }
+    }
+
+    NetworkManager::KeyManagement keyMgmt = NetworkManager::KeyManagementWpaPsk;
+    if (parameters.contains("k")) {
+        QString k = parameters.value("k").toString();
+        if (k == "wpa-psk") {
+            keyMgmt = NetworkManager::KeyManagementWpaPsk;
+        } else {
+            qCWarning(dcNetworkManagerBluetoothServer()) << "WirelessService: Connect command: Invalid key management parameter.";
+            streamData(createResponse(WirelessServiceCommandConnect, WirelessServiceResponseIvalidParameters));
+            return;
+        }
+    }
+
+    bool hidden = parameters.contains("h") && parameters.value("h").toBool();
+
+    NetworkManager::NetworkManagerError networkError = m_networkManager->connectWifi(m_device->interface(), parameters.value("e").toString(), parameters.value("p").toString(), authAlgorithm, keyMgmt, hidden);
     WirelessService::WirelessServiceResponse responseCode = WirelessService::WirelessServiceResponseSuccess;
     switch (networkError) {
     case NetworkManager::NetworkManagerErrorNoError:
@@ -312,14 +343,6 @@ void WirelessService::commandConnect(const QVariantMap &request)
         break;
     }
     streamData(createResponse(WirelessServiceCommandConnect, responseCode));
-}
-
-void WirelessService::commandConnectHidden(const QVariantMap &request)
-{
-    Q_UNUSED(request)
-
-    // TODO:
-    qCWarning(dcNetworkManagerBluetoothServer()) << "Connect to hidden network is not implemented yet.";
 }
 
 void WirelessService::commandDisconnect(const QVariantMap &request)
@@ -586,9 +609,6 @@ void WirelessService::processCommand(const QVariantMap &request)
         break;
     case WirelessServiceCommandConnect:
         commandConnect(request);
-        break;
-    case WirelessServiceCommandConnectHidden:
-        commandConnectHidden(request);
         break;
     case WirelessServiceCommandDisconnect:
         commandDisconnect(request);
