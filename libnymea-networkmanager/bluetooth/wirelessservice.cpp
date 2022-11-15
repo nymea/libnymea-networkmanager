@@ -52,11 +52,12 @@ WirelessService::WirelessService(QLowEnergyService *service, NetworkManager *net
     qCDebug(dcNetworkManagerBluetoothServer()) << "Create WirelessService.";
 
     // Service
-    connect(m_service, SIGNAL(characteristicChanged(QLowEnergyCharacteristic, QByteArray)), this, SLOT(characteristicChanged(QLowEnergyCharacteristic, QByteArray)));
-    connect(m_service, SIGNAL(characteristicRead(QLowEnergyCharacteristic, QByteArray)), this, SLOT(characteristicChanged(QLowEnergyCharacteristic, QByteArray)));
-    connect(m_service, SIGNAL(characteristicWritten(QLowEnergyCharacteristic, QByteArray)), this, SLOT(characteristicWritten(QLowEnergyCharacteristic, QByteArray)));
-    connect(m_service, SIGNAL(descriptorWritten(QLowEnergyDescriptor, QByteArray)), this, SLOT(descriptorWritten(QLowEnergyDescriptor, QByteArray)));
-    connect(m_service, SIGNAL(error(QLowEnergyService::ServiceError)), this, SLOT(serviceError(QLowEnergyService::ServiceError)));
+    connect(m_service, &QLowEnergyService::characteristicChanged, this, &WirelessService::characteristicChanged);
+    connect(m_service, &QLowEnergyService::characteristicRead, this, &WirelessService::characteristicRead);
+    connect(m_service, &QLowEnergyService::characteristicWritten, this, &WirelessService::characteristicWritten);
+    connect(m_service, &QLowEnergyService::descriptorWritten, this, &WirelessService::descriptorWritten);
+    connect(m_service, static_cast<void(QLowEnergyService::*)(QLowEnergyService::ServiceError)>
+                      (&QLowEnergyService::error), this, &WirelessService::serviceError);
 
     // Get the wireless network device if there is any
     if (!m_networkManager->wirelessAvailable()) {

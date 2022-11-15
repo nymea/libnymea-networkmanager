@@ -452,7 +452,8 @@ void BluetoothServer::start()
     connect(m_controller, &QLowEnergyController::stateChanged, this, &BluetoothServer::onControllerStateChanged);
     connect(m_controller, &QLowEnergyController::connected, this, &BluetoothServer::onConnected);
     connect(m_controller, &QLowEnergyController::disconnected, this, &BluetoothServer::onDisconnected);
-    connect(m_controller, SIGNAL(error(QLowEnergyController::Error)), this, SLOT(onError(QLowEnergyController::Error)));
+    connect(m_controller, static_cast<void(QLowEnergyController::*)(QLowEnergyController::Error)>
+                         (&QLowEnergyController::error), this, &BluetoothServer::onError);
 
     // Note: https://www.bluetooth.com/specifications/gatt/services
     m_deviceInfoService = m_controller->addService(deviceInformationServiceData(), m_controller);
