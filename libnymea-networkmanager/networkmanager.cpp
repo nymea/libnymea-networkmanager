@@ -436,7 +436,7 @@ NetworkManager::NetworkManagerError NetworkManager::createWiredManualConnection(
     }
 
     QVariantMap ipv6Settings {
-        {"method", "disabled"}
+        {"method", "auto"}
     };
 
     ConnectionSettings settings;
@@ -507,8 +507,9 @@ NetworkManager::NetworkManagerError NetworkManager::createSharedConnection(const
         ipv4Settings.insert("address-data", QVariant::fromValue(addressData)); // New style, but ignored by NM as long as addresses is still supported and given
     }
 
-    QVariantMap ipv6Settings;
-    ipv6Settings.insert("method", "disabled");
+    QVariantMap ipv6Settings {
+        {"method", "auto"}
+    };
 
     // Build connection object
     ConnectionSettings settings;
