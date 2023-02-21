@@ -1,3 +1,10 @@
+libnymea-networkmanager (1.7.0) jammy; urgency=medium
+
+  [ Michael Zanetti ]
+  * Fix ipv6.method setting for wired connection options
+
+ -- jenkins <developer@nymea.io>  Tue, 21 Feb 2023 17:43:08 +0100
+
 libnymea-networkmanager (1.6.3) jammy; urgency=medium
 
 
