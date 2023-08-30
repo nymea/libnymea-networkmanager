@@ -780,6 +780,11 @@ void NetworkManager::onServiceUnregistered()
     deinit();
 }
 
+void NetworkManager::onStateChanged(const uint &state)
+{
+    setState(static_cast<NetworkManagerState>(state));
+}
+
 void NetworkManager::onDeviceAdded(const QDBusObjectPath &deviceObjectPath)
 {
     if (m_networkDevices.keys().contains(deviceObjectPath)) {
