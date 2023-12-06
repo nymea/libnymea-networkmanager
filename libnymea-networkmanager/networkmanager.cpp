@@ -592,6 +592,24 @@ bool NetworkManager::enableWireless(bool enabled)
     return m_networkManagerInterface->setProperty("WirelessEnabled", enabled);
 }
 
+void NetworkManager::checkConnectivity()
+{
+    // Get network devices
+    qCDebug(dcNetworkManager()) << "Checking connectivity ...";
+    QDBusMessage query = m_networkManagerInterface->call("CheckConnectivity");
+    if(query.type() != QDBusMessage::ReplyMessage) {
+        qCWarning(dcNetworkManager()) << query.errorName() << query.errorMessage();
+        return;
+    }
+
+    if (query.arguments().isEmpty())
+        return;
+
+    NetworkManagerConnectivityState state = static_cast<NetworkManagerConnectivityState>(query.arguments().at(0).toUInt());
+    qCDebug(dcNetworkManager()) << "Checked connectevitiy state successfully:" << query.arguments().at(0).toUInt() << state;
+    setConnectivityState(state);
+}
+
 void NetworkManager::init()
 {
     qCDebug(dcNetworkManager()) << "Initializing network manager";
@@ -766,6 +784,7 @@ void NetworkManager::setState(const NetworkManager::NetworkManagerState &state)
     qCDebug(dcNetworkManager()) << "State changed:" << networkManagerStateToString(state);
     m_state = state;
     emit stateChanged(m_state);
+    checkConnectivity();
 }
 
 void NetworkManager::onServiceRegistered()
@@ -780,7 +799,7 @@ void NetworkManager::onServiceUnregistered()
     deinit();
 }
 
-void NetworkManager::onStateChanged(const uint &state)
+void NetworkManager::onStateChanged(uint state)
 {
     setState(static_cast<NetworkManagerState>(state));
 }
