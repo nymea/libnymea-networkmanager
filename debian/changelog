@@ -1,3 +1,14 @@
+libnymea-networkmanager (1.9.0) jammy; urgency=medium
+
+  [ Jenkins ]
+  * Added missing slot for network manger state change event
+
+  [ Simon Stürz ]
+  * Add CheckConnectivity method and verify connectivity on state
+    changed
+
+ -- jenkins <developer@nymea.io>  Mon, 18 Dec 2023 15:16:54 +0100
+
 libnymea-networkmanager (1.8.4) jammy; urgency=medium
 
 
