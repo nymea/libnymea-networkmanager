@@ -62,6 +62,9 @@ WiredNetworkDevice::WiredNetworkDevice(const QDBusObjectPath &objectPath, QObjec
     m_bitRate = m_wiredInterface->property("Bitrate").toInt();
     m_pluggedIn = m_wiredInterface->property("Carrier").toBool();
 
+    // Networkmanager < 1.2.0 uses custom signal instead of the standard D-Bus properties changed signal
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), this->objectPath().path(), NetworkManagerUtils::wiredInterfaceString(), "PropertiesChanged", this, SLOT(processProperties(QVariantMap)));
+    // Networkmanager >= 1.2.0 uses standard D-Bus properties changed signal
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), this->objectPath().path(), "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(propertiesChanged(QString, QVariantMap, QStringList)));
 }
 
@@ -83,12 +86,18 @@ bool WiredNetworkDevice::pluggedIn() const
     return m_pluggedIn;
 }
 
-void WiredNetworkDevice::propertiesChanged(const QString &interface_name, const QVariantMap &changed_properties, const QStringList &invalidated_properties)
+void WiredNetworkDevice::onPropertiesChanged(const QString &interfaceName, const QVariantMap &changedProperties, const QStringList &invalidatedProperties)
 {
-    Q_UNUSED(interface_name)
-    Q_UNUSED(invalidated_properties)
-    if (changed_properties.contains("Carrier")) {
-        m_pluggedIn = changed_properties.value("Carrier").toBool();
+    Q_UNUSED(interfaceName)
+    Q_UNUSED(invalidatedProperties)
+    //qCDebug(dcNetworkManager()) << "WiredNetworkDevice: Properties changed" << interface << changedProperties << invalidatedProperties;
+    processProperties(changedProperties);
+}
+
+void WiredNetworkDevice::processProperties(const QVariantMap &properties)
+{
+    if (properties.contains("Carrier")) {
+        m_pluggedIn = properties.value("Carrier").toBool();
         emit pluggedInChanged(m_pluggedIn);
     }
 

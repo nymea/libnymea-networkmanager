@@ -592,6 +592,24 @@ bool NetworkManager::enableWireless(bool enabled)
     return m_networkManagerInterface->setProperty("WirelessEnabled", enabled);
 }
 
+void NetworkManager::checkConnectivity()
+{
+    // Get network devices
+    qCDebug(dcNetworkManager()) << "Checking connectivity ...";
+    QDBusMessage query = m_networkManagerInterface->call("CheckConnectivity");
+    if(query.type() != QDBusMessage::ReplyMessage) {
+        qCWarning(dcNetworkManager()) << query.errorName() << query.errorMessage();
+        return;
+    }
+
+    if (query.arguments().isEmpty())
+        return;
+
+    NetworkManagerConnectivityState state = static_cast<NetworkManagerConnectivityState>(query.arguments().at(0).toUInt());
+    qCDebug(dcNetworkManager()) << "Checked connectevitiy state successfully:" << query.arguments().at(0).toUInt() << state;
+    setConnectivityState(state);
+}
+
 void NetworkManager::init()
 {
     qCDebug(dcNetworkManager()) << "Initializing network manager";
@@ -635,7 +653,11 @@ void NetworkManager::init()
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "StateChanged", this, SLOT(onStateChanged(uint)));
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "DeviceAdded", this, SLOT(onDeviceAdded(QDBusObjectPath)));
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "DeviceRemoved", this, SLOT(onDeviceRemoved(QDBusObjectPath)));
-    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "PropertiesChanged", this, SLOT(onPropertiesChanged(QVariantMap)));
+
+    // Networkmanager < 1.2.0 uses custom signal instead of the standard D-Bus properties changed signal
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "PropertiesChanged", this, SLOT(processProperties(QVariantMap)));
+    // Networkmanager >= 1.2.0 uses standard D-Bus properties changed signal
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(),  "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(onPropertiesChanged(QString,QVariantMap,QStringList)));
 
     // Load network devices
     loadDevices();
@@ -766,6 +788,7 @@ void NetworkManager::setState(const NetworkManager::NetworkManagerState &state)
     qCDebug(dcNetworkManager()) << "State changed:" << networkManagerStateToString(state);
     m_state = state;
     emit stateChanged(m_state);
+    checkConnectivity();
 }
 
 void NetworkManager::onServiceRegistered()
@@ -780,7 +803,7 @@ void NetworkManager::onServiceUnregistered()
     deinit();
 }
 
-void NetworkManager::onStateChanged(const uint &state)
+void NetworkManager::onStateChanged(uint state)
 {
     setState(static_cast<NetworkManagerState>(state));
 }
@@ -856,7 +879,15 @@ void NetworkManager::onDeviceRemoved(const QDBusObjectPath &deviceObjectPath)
     networkDevice->deleteLater();
 }
 
-void NetworkManager::onPropertiesChanged(const QVariantMap &properties)
+void NetworkManager::onPropertiesChanged(const QString &interface, const QVariantMap &changedProperties, const QStringList &invalidatedProperties)
+{
+    Q_UNUSED(interface)
+    Q_UNUSED(invalidatedProperties)
+    //qCDebug(dcNetworkManager()) << "NetworkManager: Properties changed" << interface << changedProperties << invalidatedProperties;
+    processProperties(changedProperties);
+}
+
+void NetworkManager::processProperties(const QVariantMap &properties)
 {
     if (properties.contains("Version"))
         setVersion(properties.value("Version").toString());

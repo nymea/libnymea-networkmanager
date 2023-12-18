@@ -134,6 +134,8 @@ public:
     bool wirelessEnabled() const;
     bool enableWireless(bool enabled);
 
+    void checkConnectivity();
+
 private:
     QDBusServiceWatcher *m_serviceWatcher = nullptr;
     QDBusInterface *m_networkManagerInterface  = nullptr;
@@ -187,10 +189,11 @@ private slots:
     void onServiceRegistered();
     void onServiceUnregistered();
 
-    void onStateChanged(const uint &state);
+    void onStateChanged(uint state);
     void onDeviceAdded(const QDBusObjectPath &deviceObjectPath);
     void onDeviceRemoved(const QDBusObjectPath &deviceObjectPath);
-    void onPropertiesChanged(const QVariantMap &properties);
+    void onPropertiesChanged(const QString &interface, const QVariantMap &changedProperties, const QStringList &invalidatedProperties);
+    void processProperties(const QVariantMap &properties);
 
     void onWirelessDeviceChanged();
     void onWiredDeviceChanged();

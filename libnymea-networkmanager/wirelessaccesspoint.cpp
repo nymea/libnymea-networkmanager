@@ -84,7 +84,10 @@ WirelessAccessPoint::WirelessAccessPoint(const QDBusObjectPath &objectPath, QObj
     qCDebug(dcNetworkManager()) << ssid() << "RSN flags:" << m_rsnFlags;
     qCDebug(dcNetworkManager()) << ssid() << "Capabilities:" << m_capabilities;
 
-    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), objectPath.path(), NetworkManagerUtils::accessPointInterfaceString(), "PropertiesChanged", this, SLOT(onPropertiesChanged(QVariantMap)));
+    // Networkmanager < 1.2.0 uses custom signal instead of the standard D-Bus properties changed signal
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), this->objectPath().path(), NetworkManagerUtils::accessPointInterfaceString(), "PropertiesChanged", this, SLOT(processProperties(QVariantMap)));
+    // Networkmanager >= 1.2.0 uses standard D-Bus properties changed signal
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), objectPath.path(),  "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(onPropertiesChanged(QString,QVariantMap,QStringList)));
 }
 
 /*! Returns the dbus object path of this \l{WirelessAccessPoint}. */
@@ -153,6 +156,20 @@ void WirelessAccessPoint::setIsProtected(bool isProtected)
     m_isProtected = isProtected;
 }
 
+void WirelessAccessPoint::onPropertiesChanged(const QString &interface, const QVariantMap &changedProperties, const QStringList &invalidatedProperties)
+{
+    Q_UNUSED(interface)
+    Q_UNUSED(invalidatedProperties)
+    //qCDebug(dcNetworkManager()) << "WirelessAccessPoint: Properties changed" << interface << changedProperties << invalidatedProperties;
+    processProperties(changedProperties);
+}
+
+void WirelessAccessPoint::processProperties(const QVariantMap &properties)
+{
+    if (properties.contains("Strength"))
+        setSignalStrength(properties.value("Strength").toInt());
+}
+
 /*! Returns true if this \l{WirelessAccessPoint} is password protected. */
 bool WirelessAccessPoint::isProtected() const
 {
@@ -184,13 +201,6 @@ WirelessAccessPoint::ApSecurityModes WirelessAccessPoint::wpaFlags() const
 WirelessAccessPoint::ApSecurityModes WirelessAccessPoint::rsnFlags() const
 {
     return m_rsnFlags;
-}
-
-void WirelessAccessPoint::onPropertiesChanged(const QVariantMap &properties)
-{
-    if (properties.contains("Strength"))
-        setSignalStrength(properties.value("Strength").toInt());
-
 }
 
 QDebug operator<<(QDebug debug, WirelessAccessPoint *accessPoint)
