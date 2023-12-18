@@ -187,6 +187,7 @@ private slots:
     void onServiceRegistered();
     void onServiceUnregistered();
 
+    void onStateChanged(const uint &state);
     void onDeviceAdded(const QDBusObjectPath &deviceObjectPath);
     void onDeviceRemoved(const QDBusObjectPath &deviceObjectPath);
     void onPropertiesChanged(const QVariantMap &properties);
