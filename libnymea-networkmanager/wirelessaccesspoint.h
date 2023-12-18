@@ -109,7 +109,8 @@ signals:
     void signalStrengthChanged();
 
 private slots:
-    void onPropertiesChanged(const QVariantMap &properties);
+    void onPropertiesChanged(const QString &interface, const QVariantMap &changedProperties, const QStringList &invalidatedProperties);
+    void processProperties(const QVariantMap &properties);
 
 };
 

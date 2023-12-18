@@ -50,7 +50,8 @@ signals:
     void pluggedInChanged(bool pluggedIn);
 
 private slots:
-    void propertiesChanged(const QString &interface_name, const QVariantMap &changed_properties, const QStringList &invalidated_properties);
+    void onPropertiesChanged(const QString &interfaceName, const QVariantMap &changedProperties, const QStringList &invalidatedProperties);
+    void processProperties(const QVariantMap &properties);
 
 private:
     QDBusInterface *m_wiredInterface = nullptr;

@@ -653,7 +653,11 @@ void NetworkManager::init()
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "StateChanged", this, SLOT(onStateChanged(uint)));
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "DeviceAdded", this, SLOT(onDeviceAdded(QDBusObjectPath)));
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "DeviceRemoved", this, SLOT(onDeviceRemoved(QDBusObjectPath)));
-    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "PropertiesChanged", this, SLOT(onPropertiesChanged(QVariantMap)));
+
+    // Networkmanager < 1.2.0 uses custom signal instead of the standard D-Bus properties changed signal
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), "PropertiesChanged", this, SLOT(processProperties(QVariantMap)));
+    // Networkmanager >= 1.2.0 uses standard D-Bus properties changed signal
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(),  "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(onPropertiesChanged(QString,QVariantMap,QStringList)));
 
     // Load network devices
     loadDevices();
@@ -875,7 +879,15 @@ void NetworkManager::onDeviceRemoved(const QDBusObjectPath &deviceObjectPath)
     networkDevice->deleteLater();
 }
 
-void NetworkManager::onPropertiesChanged(const QVariantMap &properties)
+void NetworkManager::onPropertiesChanged(const QString &interface, const QVariantMap &changedProperties, const QStringList &invalidatedProperties)
+{
+    Q_UNUSED(interface)
+    Q_UNUSED(invalidatedProperties)
+    //qCDebug(dcNetworkManager()) << "NetworkManager: Properties changed" << interface << changedProperties << invalidatedProperties;
+    processProperties(changedProperties);
+}
+
+void NetworkManager::processProperties(const QVariantMap &properties)
 {
     if (properties.contains("Version"))
         setVersion(properties.value("Version").toString());

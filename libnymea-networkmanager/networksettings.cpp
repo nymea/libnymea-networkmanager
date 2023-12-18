@@ -60,7 +60,10 @@ NetworkSettings::NetworkSettings(QObject *parent) :
 
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::settingsPathString(), NetworkManagerUtils::settingsInterfaceString(), "NewConnection", this, SLOT(connectionAdded(QDBusObjectPath)));
     QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::settingsPathString(), NetworkManagerUtils::settingsInterfaceString(), "ConnectionRemoved", this, SLOT(connectionRemoved(QDBusObjectPath)));
-    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::settingsPathString(), NetworkManagerUtils::settingsInterfaceString(), "PropertiesChanged", this, SLOT(propertiesChanged(QVariantMap)));
+    // Networkmanager < 1.2.0 uses custom signal instead of the standard D-Bus properties changed signal
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::settingsPathString(), NetworkManagerUtils::settingsInterfaceString(), "PropertiesChanged", this, SLOT(processProperties(QVariantMap)));
+    // Networkmanager >= 1.2.0 uses standard D-Bus properties changed signal
+    QDBusConnection::systemBus().connect(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::settingsPathString(),  "org.freedesktop.DBus.Properties", "PropertiesChanged", this, SLOT(onPropertiesChanged(QString,QVariantMap,QStringList)));
 }
 
 /*! Add the given \a settings to this \l{NetworkSettings}. Returns the dbus object path from the new settings. */
@@ -121,9 +124,17 @@ void NetworkSettings::connectionRemoved(const QDBusObjectPath &objectPath)
     connection->deleteLater();
 }
 
-void NetworkSettings::propertiesChanged(const QVariantMap &properties)
+void NetworkSettings::onPropertiesChanged(const QString &interface, const QVariantMap &changedProperties, const QStringList &invalidatedProperties)
+{
+    Q_UNUSED(interface)
+    Q_UNUSED(invalidatedProperties)
+    //qCDebug(dcNetworkManager()) << "Settins: Properties changed" << interface << changedProperties << invalidatedProperties;
+    processProperties(changedProperties);
+}
+
+void NetworkSettings::processProperties(const QVariantMap &properties)
 {
     Q_UNUSED(properties)
-    // TODO: handle settings changes
-    //qCDebug(dcNetworkManager()) << "Settins: properties changed" << properties;
 }
+
+

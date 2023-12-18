@@ -68,7 +68,8 @@ private:
 private slots:
     void connectionAdded(const QDBusObjectPath &objectPath);
     void connectionRemoved(const QDBusObjectPath &objectPath);
-    void propertiesChanged(const QVariantMap &properties);
+    void onPropertiesChanged(const QString &interface, const QVariantMap &changedProperties, const QStringList &invalidatedProperties);
+    void processProperties(const QVariantMap &properties);
 
 };
 
