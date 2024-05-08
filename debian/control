@@ -16,8 +16,6 @@ Section: libs
 Architecture: any
 Depends: ${shlibs:Depends},
     ${misc:Depends},
-    libqt5network5,
-    libqt5bluetooth5
 Description: Qt 5 based library for the network-manager DBus API.
   Qt 5 based library for the network-manager DBus API.
 
