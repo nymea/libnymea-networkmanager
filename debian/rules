@@ -8,12 +8,13 @@ PREPROCESS_FILES := $(wildcard debian/*.in)
 $(PREPROCESS_FILES:.in=): %: %.in
 	sed 's,/@DEB_HOST_MULTIARCH@,$(DEB_HOST_MULTIARCH:%=/%),g' $< > $@
 
-%:
-	dh $@ --buildsystem=qmake --parallel
-
 override_dh_install: $(PREPROCESS_FILES:.in=)
 	dh_install
 
 override_dh_auto_clean:
 	dh_auto_clean
 	rm -rf $(PREPROCESS_FILES:.in=)
+
+%:
+	dh $@ --buildsystem=qmake --parallel
+
