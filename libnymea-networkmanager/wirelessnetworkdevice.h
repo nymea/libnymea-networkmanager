@@ -54,11 +54,30 @@ public:
     };
     Q_ENUM(WirelessMode)
 
+    enum WirelessCapability {
+        WirelessCapabilityNone = 0x0000,
+        WirelessCapabilityCipherWEP40 = 0x0001,
+        WirelessCapabilityCipherWEP104 = 0x0002,
+        WirelessCapabilityCipherTKIP = 0x0004,
+        WirelessCapabilityCipherCCMP = 0x0008,
+        WirelessCapabilityWPA = 0x0010,
+        WirelessCapabilityRSN = 0x0020,
+        WirelessCapabilityAP = 0x0040,
+        WirelessCapabilityAdHoc = 0x0080,
+        WirelessCapabilityFreqValid = 0x0100,
+        WirelessCapability2Ghz = 0x0200,
+        WirelessCapability5Ghz = 0x0400,
+    };
+    Q_ENUM(WirelessCapability)
+    Q_DECLARE_FLAGS(WirelessCapabilities, WirelessCapability)
+    Q_FLAG(WirelessCapabilities)
+
     explicit WirelessNetworkDevice(const QDBusObjectPath &objectPath, QObject *parent = nullptr);
 
     // Properties
     QString macAddress() const;
     int bitRate() const;
+    WirelessCapabilities wirelessCapabilities() const;
     WirelessMode wirelessMode() const;
     WirelessAccessPoint *activeAccessPoint();
 
@@ -72,6 +91,7 @@ public:
 
 signals:
     void bitRateChanged(int bitRate);
+    void wirelessCapabilitiesChanged(WirelessCapabilities wirelessCapabilities);
     void wirelessModeChanged(WirelessMode mode);
     void lastScanChanged(int lastScan);
 
@@ -87,6 +107,7 @@ private:
 
     int m_bitRate;
     QString m_macAddress;
+    WirelessCapabilities m_wirelessCapabilities = WirelessCapabilityNone;
     WirelessMode m_wirelessMode = WirelessModeUnknown;
     int m_lastScan = -1;
     QDBusObjectPath m_activeAccessPointObjectPath;
