@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -45,6 +45,7 @@
 #include <QDebug>
 #include <QTimer>
 #include <QMetaEnum>
+#include <QRegularExpression>
 
 #include <arpa/inet.h>
 
@@ -342,7 +343,7 @@ NetworkManager::NetworkManagerError NetworkManager::createWiredAutoConnection(co
     QVariantMap connectionSettings {
         {"id", "auto"},
         {"autoconnect", true},
-        {"uuid", QUuid::createUuid().toString().remove(QRegExp("[{}]"))},
+        {"uuid", QUuid::createUuid().toString().remove(QRegularExpression("[{}]"))},
         {"type", "802-3-ethernet"}
     };
 
@@ -407,7 +408,7 @@ NetworkManager::NetworkManagerError NetworkManager::createWiredManualConnection(
     QVariantMap connectionSettings {
         {"id", "manual"},
         {"autoconnect", true},
-        {"uuid", QUuid::createUuid().toString().remove(QRegExp("[{}]"))},
+        {"uuid", QUuid::createUuid().toString().remove(QRegularExpression("[{}]"))},
         {"type", "802-3-ethernet"}
     };
 
