@@ -1,3 +1,10 @@
+libnymea-networkmanager (1.10.0) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * Add wireless network device capabilities
+
+ -- jenkins <developer@nymea.io>  Wed, 27 Nov 2024 09:08:29 +0100
+
 libnymea-networkmanager (1.9.5) jammy; urgency=medium
 
 
