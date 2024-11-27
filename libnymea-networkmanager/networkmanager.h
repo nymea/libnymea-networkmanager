@@ -88,6 +88,7 @@ public:
         NetworkManagerErrorNetworkingDisabled,
         NetworkManagerErrorNetworkManagerNotAvailable,
         NetworkManagerErrorInvalidConfiguration,
+        NetworkManagerErrorUnsupportedFeature
     };
     Q_ENUM(NetworkManagerError)
 
