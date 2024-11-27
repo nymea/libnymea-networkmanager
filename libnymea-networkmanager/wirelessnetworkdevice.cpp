@@ -90,6 +90,7 @@ WirelessNetworkDevice::WirelessNetworkDevice(const QDBusObjectPath &objectPath, 
     readAccessPoints();
 
     m_macAddress = m_wirelessInterface->property("HwAddress").toString();
+    m_wirelessCapabilities = static_cast<WirelessCapabilities>(m_wirelessInterface->property("WirelessCapabilities").toUInt());
     m_wirelessMode = static_cast<WirelessMode>(m_wirelessInterface->property("Mode").toUInt());
     m_bitRate = m_wirelessInterface->property("Bitrate").toInt() / 1000;
     setActiveAccessPoint(qdbus_cast<QDBusObjectPath>(m_wirelessInterface->property("ActiveAccessPoint")));
@@ -105,6 +106,11 @@ QString WirelessNetworkDevice::macAddress() const
 int WirelessNetworkDevice::bitRate() const
 {
     return m_bitRate;
+}
+
+WirelessNetworkDevice::WirelessCapabilities WirelessNetworkDevice::wirelessCapabilities() const
+{
+    return m_wirelessCapabilities;
 }
 
 WirelessNetworkDevice::WirelessMode WirelessNetworkDevice::wirelessMode() const
@@ -236,6 +242,11 @@ void WirelessNetworkDevice::processProperties(const QVariantMap &properties)
         emit wirelessModeChanged(m_wirelessMode);
     }
 
+    if (properties.contains("WirelessCapabilities")) {
+        m_wirelessCapabilities = static_cast<WirelessCapabilities>(m_wirelessInterface->property("WirelessCapabilities").toUInt());
+        emit wirelessCapabilitiesChanged(m_wirelessCapabilities);
+    }
+
     // Note: available since 1.12 (-1 means never scanned)
     if (properties.contains("LastScan")) {
         m_lastScan = m_wirelessInterface->property("LastScan").toInt();
@@ -262,6 +273,7 @@ QDebug operator<<(QDebug debug, WirelessNetworkDevice *device)
 {
     debug.nospace() << "WirelessNetworkDevice(" << device->interface() << ", ";
     debug.nospace() << device->macAddress() <<  ", ";
+    debug.nospace() << device->wirelessCapabilities() <<  ", ";
     debug.nospace() << device->wirelessMode() <<  ", ";
     debug.nospace() << device->bitRate() <<  " [Mb/s], ";
     debug.nospace() << device->deviceStateString() <<  ") ";

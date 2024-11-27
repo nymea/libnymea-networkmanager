@@ -260,6 +260,10 @@ NetworkManager::NetworkManagerError NetworkManager::startAccessPoint(const QStri
     if (!wirelessNetworkDevice)
         return NetworkManagerErrorInvalidNetworkDeviceType;
 
+
+    if (!wirelessNetworkDevice->wirelessCapabilities().testFlag(WirelessNetworkDevice::WirelessCapabilityAP))
+        return NetworkManagerErrorUnsupportedFeature;
+
     // Note: https://developer.gnome.org/NetworkManager/stable/ref-settings.html
 
     // Create network settings for access point
