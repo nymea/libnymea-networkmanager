@@ -627,7 +627,7 @@ void NetworkManager::init()
     // Create interface
     m_networkManagerInterface = new QDBusInterface(NetworkManagerUtils::networkManagerServiceString(), NetworkManagerUtils::networkManagerPathString(), NetworkManagerUtils::networkManagerServiceString(), QDBusConnection::systemBus(), this);
     if(!m_networkManagerInterface->isValid()) {
-        qCWarning(dcNetworkManager()) << "Invalid DBus network manager interface. NetworkManagre not available.";
+        qCWarning(dcNetworkManager()) << "Invalid DBus network manager interface. The NetworkManager is not available.";
         delete m_networkManagerInterface;
         m_networkManagerInterface = nullptr;
         setAvailable(false);
@@ -645,7 +645,7 @@ void NetworkManager::init()
     setWirelessEnabled(m_networkManagerInterface->property("WirelessEnabled").toBool());
 
     if (m_version.isEmpty()) {
-        qCWarning(dcNetworkManager()) << "Could not read initial properties. The networkmanager might not be initialized yet. Reinitializing in 2 seconds...";
+        qCWarning(dcNetworkManager()) << "Could not read initial properties. The NetworkManager might not be initialized yet. Reinitializing in 2 seconds...";
         delete m_networkManagerInterface;
         m_networkManagerInterface = nullptr;
         setAvailable(false);
@@ -670,7 +670,7 @@ void NetworkManager::init()
     m_networkSettings = new NetworkSettings(this);
 
     setAvailable(true);
-    qCDebug(dcNetworkManager()) << "Network manager initialized successfully.";
+    qCDebug(dcNetworkManager()) << "NetworkManager initialized successfully.";
     qCDebug(dcNetworkManager()) << "Starting initial wireless network scan...";
     foreach (WirelessNetworkDevice *wirelessDevice, m_wirelessNetworkDevices.values()) {
         wirelessDevice->scanWirelessNetworks();
@@ -703,7 +703,7 @@ void NetworkManager::deinit()
     setWirelessEnabled(false);
     setAvailable(false);
 
-    qCDebug(dcNetworkManager()) << "Netowkmanager deinitialized successfully.";
+    qCDebug(dcNetworkManager()) << "NetworkManager deinitialized successfully.";
 }
 
 void NetworkManager::loadDevices()
@@ -749,7 +749,7 @@ void NetworkManager::setAvailable(bool available)
     if (m_available == available)
         return;
 
-    qCDebug(dcNetworkManager()) << "The network manager is now" << (available ? "available" : "unavailable");
+    qCDebug(dcNetworkManager()) << "The NetworkManager is now" << (available ? "available" : "unavailable");
     m_available = available;
     emit availableChanged(m_available);
 }
@@ -925,19 +925,19 @@ void NetworkManager::onWiredDeviceChanged()
 void NetworkManager::start()
 {
     if (m_available) {
-        qCDebug(dcNetworkManager()) << "Networkmanager already running.";
+        qCDebug(dcNetworkManager()) << "NetworkManager already running.";
         return;
     }
-    qCDebug(dcNetworkManager()) << "Starting the network manager.";
+    qCDebug(dcNetworkManager()) << "Starting the NetworkManager.";
 
     init();
 }
 
 void NetworkManager::stop()
 {
-    qCDebug(dcNetworkManager()) << "Stop the network manager.";
+    qCDebug(dcNetworkManager()) << "Stop the NetworkManager.";
     if (!m_available) {
-        qCDebug(dcNetworkManager()) << "Networkmanager already stopped.";
+        qCDebug(dcNetworkManager()) << "NetworkManager already stopped.";
         return;
     }
 
