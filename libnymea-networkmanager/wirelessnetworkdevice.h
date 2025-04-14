@@ -69,6 +69,7 @@ public:
         WirelessCapability5Ghz = 0x0400,
     };
     Q_ENUM(WirelessCapability)
+
     Q_DECLARE_FLAGS(WirelessCapabilities, WirelessCapability)
     Q_FLAG(WirelessCapabilities)
 
