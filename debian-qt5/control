@@ -1,0 +1,33 @@
+Source: libnymea-networkmanager
+Section: utils
+Priority: optional
+Maintainer: nymea GmbH <developer@nymea.io>
+Standards-Version: 4.6.0
+Build-Depends: debhelper,
+    dpkg-dev,
+    pkg-config,
+    qt5-qmake,
+    qtbase5-dev,
+    qtbase5-dev-tools,
+    qtconnectivity5-dev,
+    libbluetooth-dev
+
+
+Package: libnymea-networkmanager
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends},
+    ${misc:Depends},
+Description: Qt based library for the network-manager DBus API.
+  Qt based library for the network-manager DBus API.
+
+
+Package: libnymea-networkmanager-dev
+Section: libdevel
+Architecture: any
+Depends: ${shlibs:Depends},
+    ${misc:Depends},
+    pkg-config,
+    libnymea-networkmanager (= ${binary:Version}),
+Description: Qt based library for the network-manager DBus API - development files
+  Development files for Qt based network-manager DBus API.
