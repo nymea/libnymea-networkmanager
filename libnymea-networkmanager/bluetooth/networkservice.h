@@ -82,7 +82,7 @@ private slots:
     void characteristicWritten(const QLowEnergyCharacteristic &characteristic, const QByteArray &value);
     void descriptorRead(const QLowEnergyDescriptor &descriptor, const QByteArray &value);
     void descriptorWritten(const QLowEnergyDescriptor &descriptor, const QByteArray &value);
-    void serviceError(const QLowEnergyService::ServiceError &error);
+    void serviceError(QLowEnergyService::ServiceError error);
 
     // Commands
     void processCommand(const NetworkServiceCommand &command);

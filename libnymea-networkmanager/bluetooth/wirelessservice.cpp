@@ -56,8 +56,12 @@ WirelessService::WirelessService(QLowEnergyService *service, NetworkManager *net
     connect(m_service, &QLowEnergyService::characteristicRead, this, &WirelessService::characteristicRead);
     connect(m_service, &QLowEnergyService::characteristicWritten, this, &WirelessService::characteristicWritten);
     connect(m_service, &QLowEnergyService::descriptorWritten, this, &WirelessService::descriptorWritten);
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    connect(m_service, &QLowEnergyService::errorOccurred, this, &WirelessService::serviceError);
+#else
     connect(m_service, static_cast<void(QLowEnergyService::*)(QLowEnergyService::ServiceError)>
-                      (&QLowEnergyService::error), this, &WirelessService::serviceError);
+            (&QLowEnergyService::error), this, &WirelessService::serviceError);
+#endif
 
     // Get the wireless network device if there is any
     if (!m_networkManager->wirelessAvailable()) {
@@ -83,7 +87,11 @@ QLowEnergyServiceData WirelessService::serviceData(NetworkManager *networkManage
     serviceData.setType(QLowEnergyServiceData::ServiceTypePrimary);
     serviceData.setUuid(wirelessServiceUuid);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    QLowEnergyDescriptorData clientConfigDescriptorData(QBluetoothUuid::DescriptorType::ClientCharacteristicConfiguration, QByteArray(2, 0));
+#else
     QLowEnergyDescriptorData clientConfigDescriptorData(QBluetoothUuid::ClientCharacteristicConfiguration, QByteArray(2, 0));
+#endif
 
     QLowEnergyCharacteristicData versionCharacteristicData;
     versionCharacteristicData.setUuid(wirelessServiceVersionCharacteristicUuid);
@@ -225,13 +233,13 @@ void WirelessService::streamData(const QVariantMap &responseMap)
     }
 
     QByteArray data = QJsonDocument::fromVariant(responseMap).toJson(QJsonDocument::Compact) + '\n';
-    qCDebug(dcNetworkManagerBluetoothServer()) << "WirelessService: Start streaming response data:" << data.count() << "bytes";
+    qCDebug(dcNetworkManagerBluetoothServer()) << "WirelessService: Start streaming response data:" << data.length() << "bytes";
 
     QByteArray remainingData = data;
     while (!remainingData.isEmpty()) {
         QByteArray package = remainingData.left(20);
         m_service->writeCharacteristic(characteristic, package);
-        remainingData = remainingData.remove(0, package.count());
+        remainingData = remainingData.remove(0, package.length());
     }
 
     qCDebug(dcNetworkManagerBluetoothServer()) << "WirelessService: Finished streaming response data";
@@ -549,7 +557,7 @@ void WirelessService::descriptorWritten(const QLowEnergyDescriptor &descriptor, 
     qCDebug(dcNetworkManagerBluetoothServer()) << "WirelessService: Descriptor written" << descriptor.uuid().toString() << value;
 }
 
-void WirelessService::serviceError(const QLowEnergyService::ServiceError &error)
+void WirelessService::serviceError(QLowEnergyService::ServiceError error)
 {
     QString errorString;
     switch (error) {
