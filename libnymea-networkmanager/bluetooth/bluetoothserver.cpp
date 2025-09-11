@@ -128,11 +128,19 @@ QLowEnergyServiceData BluetoothServer::deviceInformationServiceData()
 {
     QLowEnergyServiceData serviceData;
     serviceData.setType(QLowEnergyServiceData::ServiceTypePrimary);
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    serviceData.setUuid(QBluetoothUuid::ServiceClassUuid::DeviceInformation);
+#else
     serviceData.setUuid(QBluetoothUuid::DeviceInformation);
+#endif
 
     // Model number string 0x2a24
     QLowEnergyCharacteristicData modelNumberCharData;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    modelNumberCharData.setUuid(QBluetoothUuid::CharacteristicType::ModelNumberString);
+#else
     modelNumberCharData.setUuid(QBluetoothUuid::ModelNumberString);
+#endif
     if (m_modelName.isEmpty()) {
         modelNumberCharData.setValue(QString("N.A.").toUtf8());
     } else {
@@ -144,7 +152,11 @@ QLowEnergyServiceData BluetoothServer::deviceInformationServiceData()
 
     // Serial number string 0x2a25
     QLowEnergyCharacteristicData serialNumberCharData;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    serialNumberCharData.setUuid(QBluetoothUuid::CharacteristicType::SerialNumberString);
+#else
     serialNumberCharData.setUuid(QBluetoothUuid::SerialNumberString);
+#endif
     if (m_serialNumber.isNull()) {
         // Note: if no serialnumber specified use the system uuid from /etc/machine-id
         qCDebug(dcNetworkManagerBluetoothServer()) << "Serial number not specified. Using system uuid from /etc/machine-id as serialnumber.";
@@ -156,28 +168,44 @@ QLowEnergyServiceData BluetoothServer::deviceInformationServiceData()
 
     // Firmware revision string 0x2a26
     QLowEnergyCharacteristicData firmwareRevisionCharData;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    firmwareRevisionCharData.setUuid(QBluetoothUuid::CharacteristicType::FirmwareRevisionString);
+#else
     firmwareRevisionCharData.setUuid(QBluetoothUuid::FirmwareRevisionString);
+#endif
     firmwareRevisionCharData.setValue(QString(VERSION_STRING).toUtf8());
     firmwareRevisionCharData.setProperties(QLowEnergyCharacteristic::Read);
     serviceData.addCharacteristic(firmwareRevisionCharData);
 
     // Hardware revision string 0x2a27
     QLowEnergyCharacteristicData hardwareRevisionCharData;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    hardwareRevisionCharData.setUuid(QBluetoothUuid::CharacteristicType::HardwareRevisionString);
+#else
     hardwareRevisionCharData.setUuid(QBluetoothUuid::HardwareRevisionString);
+#endif
     hardwareRevisionCharData.setValue(m_hardwareVersion.toUtf8());
     hardwareRevisionCharData.setProperties(QLowEnergyCharacteristic::Read);
     serviceData.addCharacteristic(hardwareRevisionCharData);
 
     // Software revision string 0x2a28
     QLowEnergyCharacteristicData softwareRevisionCharData;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    softwareRevisionCharData.setUuid(QBluetoothUuid::CharacteristicType::SoftwareRevisionString);
+#else
     softwareRevisionCharData.setUuid(QBluetoothUuid::SoftwareRevisionString);
+#endif
     softwareRevisionCharData.setValue(m_softwareVersion.toUtf8());
     softwareRevisionCharData.setProperties(QLowEnergyCharacteristic::Read);
     serviceData.addCharacteristic(softwareRevisionCharData);
 
     // Manufacturer name string 0x2a29
     QLowEnergyCharacteristicData manufacturerNameCharData;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    manufacturerNameCharData.setUuid(QBluetoothUuid::CharacteristicType::ManufacturerNameString);
+#else
     manufacturerNameCharData.setUuid(QBluetoothUuid::ManufacturerNameString);
+#endif
     manufacturerNameCharData.setValue(QString("nymea GmbH").toUtf8());
     manufacturerNameCharData.setProperties(QLowEnergyCharacteristic::Read);
     serviceData.addCharacteristic(manufacturerNameCharData);
@@ -189,11 +217,19 @@ QLowEnergyServiceData BluetoothServer::genericAccessServiceData()
 {
     QLowEnergyServiceData serviceData;
     serviceData.setType(QLowEnergyServiceData::ServiceTypePrimary);
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    serviceData.setUuid(QBluetoothUuid::ServiceClassUuid::GenericAccess);
+#else
     serviceData.setUuid(QBluetoothUuid::GenericAccess);
+#endif
 
     // Device name 0x2a00
     QLowEnergyCharacteristicData nameCharData;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    nameCharData.setUuid(QBluetoothUuid::CharacteristicType::DeviceName);
+#else
     nameCharData.setUuid(QBluetoothUuid::DeviceName);
+#endif
     if (m_advertiseName.isNull()) {
         qCWarning(dcNetworkManagerBluetoothServer()) << "Advertise name not specified. Using system host name as device name.";
         m_advertiseName = QSysInfo::machineHostName();
@@ -204,21 +240,33 @@ QLowEnergyServiceData BluetoothServer::genericAccessServiceData()
 
     // Appearance 0x2a01
     QLowEnergyCharacteristicData appearanceCharData;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    appearanceCharData.setUuid(QBluetoothUuid::CharacteristicType::Appearance);
+#else
     appearanceCharData.setUuid(QBluetoothUuid::Appearance);
+#endif
     appearanceCharData.setValue(QByteArray(4, 0));
     appearanceCharData.setProperties(QLowEnergyCharacteristic::Read);
     serviceData.addCharacteristic(appearanceCharData);
 
     // Peripheral Privacy Flag 0x2a02
     QLowEnergyCharacteristicData privacyFlagCharData;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    privacyFlagCharData.setUuid(QBluetoothUuid::CharacteristicType::PeripheralPrivacyFlag);
+#else
     privacyFlagCharData.setUuid(QBluetoothUuid::PeripheralPrivacyFlag);
+#endif
     privacyFlagCharData.setValue(QByteArray(2, 0));
     privacyFlagCharData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Write);
     serviceData.addCharacteristic(privacyFlagCharData);
 
     // Reconnection Address 0x2a03
     QLowEnergyCharacteristicData reconnectionAddressCharData;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    reconnectionAddressCharData.setUuid(QBluetoothUuid::CharacteristicType::ReconnectionAddress);
+#else
     reconnectionAddressCharData.setUuid(QBluetoothUuid::ReconnectionAddress);
+#endif
     reconnectionAddressCharData.setValue(QByteArray());
     reconnectionAddressCharData.setProperties(QLowEnergyCharacteristic::Write);
     serviceData.addCharacteristic(reconnectionAddressCharData);
@@ -230,10 +278,18 @@ QLowEnergyServiceData BluetoothServer::genericAttributeServiceData()
 {
     QLowEnergyServiceData serviceData;
     serviceData.setType(QLowEnergyServiceData::ServiceTypePrimary);
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    serviceData.setUuid(QBluetoothUuid::ServiceClassUuid::GenericAttribute);
+#else
     serviceData.setUuid(QBluetoothUuid::GenericAttribute);
+#endif
 
     QLowEnergyCharacteristicData charData;
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    charData.setUuid(QBluetoothUuid::CharacteristicType::ServiceChanged);
+#else
     charData.setUuid(QBluetoothUuid::ServiceChanged);
+#endif
     charData.setProperties(QLowEnergyCharacteristic::Indicate);
 
     serviceData.addCharacteristic(charData);
@@ -452,8 +508,13 @@ void BluetoothServer::start()
     connect(m_controller, &QLowEnergyController::stateChanged, this, &BluetoothServer::onControllerStateChanged);
     connect(m_controller, &QLowEnergyController::connected, this, &BluetoothServer::onConnected);
     connect(m_controller, &QLowEnergyController::disconnected, this, &BluetoothServer::onDisconnected);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    connect(m_controller,  &QLowEnergyController::errorOccurred, this, &BluetoothServer::onError);
+#else
     connect(m_controller, static_cast<void(QLowEnergyController::*)(QLowEnergyController::Error)>
-                         (&QLowEnergyController::error), this, &BluetoothServer::onError);
+            (&QLowEnergyController::error), this, &BluetoothServer::onError);
+#endif
 
     // Note: https://www.bluetooth.com/specifications/gatt/services
     m_deviceInfoService = m_controller->addService(deviceInformationServiceData(), m_controller);

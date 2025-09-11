@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 *
-* Copyright 2013 - 2020, nymea GmbH
+* Copyright 2013 - 2024, nymea GmbH
 * Contact: contact@nymea.io
 *
 * This file is part of nymea.
@@ -137,7 +137,7 @@ bool NetworkConnection::autoconnect() const
 /*! Returns the timestamp of this \l{NetworkConnection} from the last connection. */
 QDateTime NetworkConnection::timeStamp() const
 {
-    return QDateTime::fromTime_t(m_connectionSettings.value("connection").value("timestamp").toUInt());
+    return QDateTime::fromSecsSinceEpoch(m_connectionSettings.value("connection").value("timestamp").toUInt());
 }
 
 QDebug operator<<(QDebug debug, NetworkConnection *networkConnection)

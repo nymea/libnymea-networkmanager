@@ -3,8 +3,20 @@ TEMPLATE = lib
 
 QT += dbus network
 
-QMAKE_CXXFLAGS *= -Werror -std=c++11 -g
-QMAKE_LFLAGS *= -std=c++11
+greaterThan(QT_MAJOR_VERSION, 5) {
+    message("Building using Qt6 support")
+    CONFIG *= c++17
+    QMAKE_LFLAGS *= -std=c++17
+    QMAKE_CXXFLAGS *= -std=c++17
+} else {
+    message("Building using Qt5 support")
+    CONFIG *= c++11
+    QMAKE_LFLAGS *= -std=c++11
+    QMAKE_CXXFLAGS *= -std=c++11
+    DEFINES += QT_DISABLE_DEPRECATED_UP_TO=0x050F00
+}
+
+QMAKE_CXXFLAGS *= -Werror -g
 
 DEFINES += VERSION_STRING=\\\"$${VERSION_STRING}\\\"
 
@@ -28,7 +40,9 @@ SOURCES += \
     wirelessnetworkdevice.cpp \
     networkmanagerutils.cpp
 
-equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 7) {
+lessThan(QT_MAJOR_VERSION, 6):lessThan(QT_MINOR_VERSION, 7) {
+    message(Bluetooth LE server functionality not supported with Qt $${QT_VERSION}.)
+} else {
     message(Building with Bluetooth LE server functionality. Qt $${QT_VERSION}.)
 
     QT += bluetooth
@@ -43,8 +57,6 @@ equals(QT_MAJOR_VERSION, 5):!lessThan(QT_MINOR_VERSION, 7) {
         bluetooth/bluetoothserver.cpp \
         bluetooth/networkservice.cpp \
         bluetooth/wirelessservice.cpp \
-} else {
-    message(Bluetooth LE server functionality not supported with Qt $${QT_VERSION}.)
 }
 
 target.path = $$[QT_INSTALL_LIBS]

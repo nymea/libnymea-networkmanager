@@ -54,8 +54,13 @@ NetworkService::NetworkService(QLowEnergyService *service, NetworkManager *netwo
     connect(m_service, &QLowEnergyService::characteristicRead, this, &NetworkService::characteristicRead);
     connect(m_service, &QLowEnergyService::characteristicWritten, this, &NetworkService::characteristicWritten);
     connect(m_service, &QLowEnergyService::descriptorWritten, this, &NetworkService::descriptorWritten);
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    connect(m_service,  &QLowEnergyService::errorOccurred, this, &NetworkService::serviceError);
+#else
     connect(m_service, static_cast<void(QLowEnergyService::*)(QLowEnergyService::ServiceError)>
-                      (&QLowEnergyService::error), this, &NetworkService::serviceError);
+            (&QLowEnergyService::error), this, &NetworkService::serviceError);
+
+#endif
 
     // NetworkManager
     connect(m_networkManager, &NetworkManager::stateChanged, this, &NetworkService::onNetworkManagerStateChanged);
@@ -74,7 +79,11 @@ QLowEnergyServiceData NetworkService::serviceData(NetworkManager *networkManager
     serviceData.setType(QLowEnergyServiceData::ServiceTypePrimary);
     serviceData.setUuid(networkServiceUuid);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
+    QLowEnergyDescriptorData clientConfigDescriptorData(QBluetoothUuid::DescriptorType::ClientCharacteristicConfiguration, QByteArray(2, 0));
+#else
     QLowEnergyDescriptorData clientConfigDescriptorData(QBluetoothUuid::ClientCharacteristicConfiguration, QByteArray(2, 0));
+#endif
 
     // Network manager status ef6d661-b8af-49e0-9eca-ab343513641c
     QLowEnergyCharacteristicData networkStatusData;
@@ -253,7 +262,7 @@ void NetworkService::descriptorWritten(const QLowEnergyDescriptor &descriptor, c
     qCDebug(dcNetworkManagerBluetoothServer()) << "NetworkService: Descriptor written" << descriptor.uuid().toString() << value;
 }
 
-void NetworkService::serviceError(const QLowEnergyService::ServiceError &error)
+void NetworkService::serviceError(QLowEnergyService::ServiceError error)
 {
     QString errorString;
     switch (error) {
