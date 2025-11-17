@@ -3,11 +3,11 @@ include(html-template.qdocconf)
 project = libnymea-networkmanager
 description = libnymea-networkmanager documentation
 
-dita.metadata.default.author      = Simon Stürz
+dita.metadata.default.author      = nymea GmbH; chargebyte austria GmbH
 dita.metadata.default.permissions = all
-dita.metadata.default.publisher   = guh GmbH
-dita.metadata.default.copyryear = 2019
-dita.metadata.default.copyrholder = Simon Stürz
+dita.metadata.default.publisher   = chargebyte austria GmbH
+dita.metadata.default.copyryear = 2013-2025
+dita.metadata.default.copyrholder = nymea GmbH; chargebyte austria GmbH
 dita.metadata.default.audience = programmer
 
 outputdir = html
@@ -28,4 +28,3 @@ headers.fileextensions = "*.h"
 sources.fileextensions = "*.cpp *.qdoc"
 
 Cpp.ignoredirectives = Q_DECLARE_METATYPE Q_DECLARE_LOGGING_CATEGORY Q_LOGGING_CATEGORY Q_ENUM
-
