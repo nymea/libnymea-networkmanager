@@ -1,3 +1,10 @@
+libnymea-networkmanager (1.14.0) jammy; urgency=medium
+
+  [ Simon Stürz ]
+  * Update license text and add SPDX identifier
+
+ -- jenkins <developer@nymea.io>  Wed, 19 Nov 2025 09:41:38 +0100
+
 libnymea-networkmanager (1.12.3) jammy; urgency=medium
 
 
