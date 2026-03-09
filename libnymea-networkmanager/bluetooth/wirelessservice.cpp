@@ -80,9 +80,7 @@ QLowEnergyServiceData WirelessService::serviceData(NetworkManager *networkManage
     serviceData.setType(QLowEnergyServiceData::ServiceTypePrimary);
     serviceData.setUuid(wirelessServiceUuid);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-    QLowEnergyDescriptorData clientConfigDescriptorData(QBluetoothUuid::DescriptorType::ClientCharacteristicConfiguration, QByteArray(2, 0));
-#else
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     QLowEnergyDescriptorData clientConfigDescriptorData(QBluetoothUuid::ClientCharacteristicConfiguration, QByteArray(2, 0));
 #endif
 
@@ -104,7 +102,9 @@ QLowEnergyServiceData WirelessService::serviceData(NetworkManager *networkManage
     QLowEnergyCharacteristicData wirelessResponseCharacteristicData;
     wirelessResponseCharacteristicData.setUuid(wirelessResponseCharacteristicUuid);
     wirelessResponseCharacteristicData.setProperties(QLowEnergyCharacteristic::Notify);
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     wirelessResponseCharacteristicData.addDescriptor(clientConfigDescriptorData);
+#endif
     wirelessResponseCharacteristicData.setValueLength(0, 20);
     serviceData.addCharacteristic(wirelessResponseCharacteristicData);
 
@@ -112,7 +112,9 @@ QLowEnergyServiceData WirelessService::serviceData(NetworkManager *networkManage
     QLowEnergyCharacteristicData wirelessStatusCharacteristicData;
     wirelessStatusCharacteristicData.setUuid(wirelessStateCharacteristicUuid);
     wirelessStatusCharacteristicData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     wirelessStatusCharacteristicData.addDescriptor(clientConfigDescriptorData);
+#endif
     wirelessStatusCharacteristicData.setValueLength(1, 1);
     if (networkManager->wirelessNetworkDevices().isEmpty()) {
         wirelessStatusCharacteristicData.setValue(WirelessService::getWirelessNetworkDeviceState(NetworkDevice::NetworkDeviceStateUnknown));
@@ -125,7 +127,9 @@ QLowEnergyServiceData WirelessService::serviceData(NetworkManager *networkManage
     QLowEnergyCharacteristicData wirelessModeCharacteristicData;
     wirelessModeCharacteristicData.setUuid(wirelessModeCharacteristicUuid);
     wirelessModeCharacteristicData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     wirelessModeCharacteristicData.addDescriptor(clientConfigDescriptorData);
+#endif
     wirelessModeCharacteristicData.setValueLength(1, 1);
     if (networkManager->wirelessNetworkDevices().isEmpty()) {
         wirelessModeCharacteristicData.setValue(WirelessService::getWirelessMode(WirelessNetworkDevice::WirelessModeUnknown));

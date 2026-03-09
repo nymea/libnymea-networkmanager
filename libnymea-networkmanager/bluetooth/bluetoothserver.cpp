@@ -511,8 +511,10 @@ void BluetoothServer::start()
 
     // Note: https://www.bluetooth.com/specifications/gatt/services
     m_deviceInfoService = m_controller->addService(deviceInformationServiceData(), m_controller);
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     m_genericAccessService = m_controller->addService(genericAccessServiceData(), m_controller);
     m_genericAttributeService = m_controller->addService(genericAttributeServiceData(), m_controller);
+#endif
 
     // Create custom services
     m_networkService = new NetworkService(m_controller->addService(NetworkService::serviceData(m_networkManager), m_controller),

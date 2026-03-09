@@ -72,9 +72,7 @@ QLowEnergyServiceData NetworkService::serviceData(NetworkManager *networkManager
     serviceData.setType(QLowEnergyServiceData::ServiceTypePrimary);
     serviceData.setUuid(networkServiceUuid);
 
-#if QT_VERSION >= QT_VERSION_CHECK(6,0,0)
-    QLowEnergyDescriptorData clientConfigDescriptorData(QBluetoothUuid::DescriptorType::ClientCharacteristicConfiguration, QByteArray(2, 0));
-#else
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     QLowEnergyDescriptorData clientConfigDescriptorData(QBluetoothUuid::ClientCharacteristicConfiguration, QByteArray(2, 0));
 #endif
 
@@ -83,7 +81,9 @@ QLowEnergyServiceData NetworkService::serviceData(NetworkManager *networkManager
     networkStatusData.setUuid(networkStatusCharacteristicUuid);
     networkStatusData.setValue(QByteArray(1, 0));
     networkStatusData.setProperties(QLowEnergyCharacteristic::Read | QLowEnergyCharacteristic::Notify);
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     networkStatusData.addDescriptor(clientConfigDescriptorData);
+#endif
     networkStatusData.setValue(NetworkService::getNetworkManagerStateByteArray(networkManager->state()));
     serviceData.addCharacteristic(networkStatusData);
 
@@ -98,7 +98,9 @@ QLowEnergyServiceData NetworkService::serviceData(NetworkManager *networkManager
     QLowEnergyCharacteristicData networkResponseCharacteristicData;
     networkResponseCharacteristicData.setUuid(networkResponseCharacteristicUuid);
     networkResponseCharacteristicData.setProperties(QLowEnergyCharacteristic::Notify);
+#if QT_VERSION < QT_VERSION_CHECK(6,0,0)
     networkResponseCharacteristicData.addDescriptor(clientConfigDescriptorData);
+#endif
     networkResponseCharacteristicData.setValueLength(1, 1);
     serviceData.addCharacteristic(networkResponseCharacteristicData);
 
