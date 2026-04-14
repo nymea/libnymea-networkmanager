@@ -1,3 +1,10 @@
+libnymea-networkmanager (1.15.0) noble; urgency=medium
+
+  [ Simon Stürz ]
+  * Bluetooth: Make the bluetooth server work with Qt6 bluez5 backend
+
+ -- jenkins <developer@nymea.io>  Tue, 14 Apr 2026 14:23:29 +0200
+
 libnymea-networkmanager (1.14.2) noble; urgency=medium
 
 
